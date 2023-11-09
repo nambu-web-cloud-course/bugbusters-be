@@ -16,5 +16,17 @@ let sequelize = new Sequelize(
 
 db.sequelize = sequelize;
 
+const User = require('./User.js');
+const Buster = require('./Buster.js');
+
+db.User = User;
+db.Buster = Buster;
+
+User.init(sequelize);
+Buster.init(sequelize);
+
+
+User.associate(db);
+Buster.associate(db);
 
 module.exports = db;

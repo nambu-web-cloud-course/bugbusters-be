@@ -4,27 +4,58 @@ class User extends Sequelize.Model {
     static init(sequelize) {
         return super.init(
             { //테이블의 컬럼 정의
-                userid: {
+                userid: { //아이디
                     type: Sequelize.STRING(15),
                     allowNull: false,
                     unique: true,
+                    primaryKey: true
                 },
-                name: {
+                name: { //이름 (실명)
                     type:Sequelize.STRING(10),
                     allowNull: false,
                 },
-                password: {
-                    type:Sequelize.STRING(20),
+                password: { // 비번
+                    type:Sequelize.STRING(100),
                     allowNull: false,
                 },
-                gender: {
-                    type:Sequelize.CHAR(1),     //M: 남자, F:여자
+                gender: { //M: 남자, F:여자
+                    type:Sequelize.CHAR(1),          
                     allowNull: false,
                 },
-                addr1: {
-                    type:Sequelize.VARCHAR(50),     //M: 남자, F:여자
+                addr1: { //도로명 주소
+                    type:Sequelize.STRING(50),      
                     allowNull: false,
                 },
+                addr2: { //상세 주소
+                    type:Sequelize.STRING(50),         
+                    allowNull: false,
+                },
+                zipcode: { //우편번호
+                    type:Sequelize.CHAR(5),     
+                    allowNull: false,
+                },
+                sido: { //시도
+                    type:Sequelize.STRING(10),     
+                    allowNull: false,
+                },
+                sigungu: { //시군구
+                    type:Sequelize.STRING(20),     
+                    allowNull: false,
+                },
+                phone: { //휴대폰번호
+                    type:Sequelize.CHAR(13),     
+                    allowNull: false,
+                },
+                birthdate: { //생년월일(YYYYMMDD)
+                    type:Sequelize.CHAR(8),     
+                    allowNull: false,
+                },
+                usertype: { //사용자 종류 (고객(C, default), 버스터(B))
+                    type:Sequelize.CHAR(1),     
+                    allowNull: false,
+                },
+                
+                
                 
             },
             {
@@ -41,7 +72,8 @@ class User extends Sequelize.Model {
     }
     static associate(db){
         //테이블간 관계를 정의
-        db.User.hasMany(db.Post, {foreignKey:'user_id', sourceKey:'user_id'});
+
+        db.User.hasOne(db.Buster, {foreignKey:'user_userid', sourceKey:'userid'});
         
     }
 }
