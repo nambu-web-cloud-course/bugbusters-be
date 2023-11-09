@@ -37,6 +37,7 @@ class User extends Sequelize.Model {
                 sido: { //시도
                     type:Sequelize.STRING(10),     
                     allowNull: false,
+                    defaultValue:"서울시"
                 },
                 sigungu: { //시군구
                     type:Sequelize.STRING(20),     
@@ -53,6 +54,7 @@ class User extends Sequelize.Model {
                 usertype: { //사용자 종류 (고객(C, default), 버스터(B))
                     type:Sequelize.CHAR(1),     
                     allowNull: false,
+                    defaultValue:'C'
                 },
                 
                 
