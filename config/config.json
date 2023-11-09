@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "dbuser",
-    "password": "cloud119",
+    "password": "Pass1234",
     "database": "bugbusters",
     "host": "127.0.0.1",
     "dialect": "mysql"
