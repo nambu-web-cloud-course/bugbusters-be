@@ -27,7 +27,7 @@ router.post('/sign-up', async (req, res)=> {
     try{
         const result = await User.create(new_user);
         // console.log('result', result);
-        res.send ({success:true}) ;
+        res.send ({success:true, data:result}) ;
     } catch (error ){
         res.send ({success:false, message:error, error:error});
     }
