@@ -135,13 +135,13 @@ router.get('/buster', async (req, res)=> {
         // const filtered = posts.filter ((post)=>post.user_id === user_id);
         const result = await Buster.findOne({
             // attributes: ['user_id', 'user_name'],
-            where: { userid: userid}
+            where: { userid: userid }
         });
         if (result) {
-            res.send({success:true, data: result});
+            res.send({ success:true, data: result});
         }
         else
-            res.send({success:false, message:'해당 사용자의 정보가 없습니다.'})
+            res.send({ success:false, message:'해당 사용자의 정보가 없습니다.'})
         
     }
     else {

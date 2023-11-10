@@ -59,7 +59,7 @@ class Request extends Sequelize.Model {
     static associate(db){
         //테이블간 관계를 정의
         // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
-        db.Request.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false, unique:true}, sourceKey:'userid', });
+        db.Request.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid' });
     }
 }
 module.exports = Request;
