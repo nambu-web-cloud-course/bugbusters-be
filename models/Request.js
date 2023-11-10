@@ -1,25 +1,19 @@
 const Sequelize = require('sequelize');
 
-class User extends Sequelize.Model {
+class Request extends Sequelize.Model {
     static init(sequelize) {
         return super.init(
             { //테이블의 컬럼 정의
-                userid: { //아이디
-                    type: Sequelize.STRING(15),
-                    allowNull: false,
-                    unique: true,
-                    primaryKey: true
-                },
-                name: { //이름 (실명)
-                    type:Sequelize.STRING(10),
+                content: { //요청사항
+                    type: Sequelize.TEXT,
                     allowNull: false,
                 },
-                password: { // 비번
-                    type:Sequelize.STRING(100),
+                price: { //금액 
+                    type:Sequelize.INTEGER,
                     allowNull: false,
                 },
-                gender: { //M: 남자, F:여자
-                    type:Sequelize.CHAR(1),          
+                gender: { // 성별(여성만-F, 남성만-M, 무관-A)
+                    type:Sequelize.CHAR(1),
                     allowNull: false,
                 },
                 addr1: { //도로명 주소
@@ -43,29 +37,19 @@ class User extends Sequelize.Model {
                     type:Sequelize.STRING(20),     
                     allowNull: false,
                 },
-                phone: { //휴대폰번호
-                    type:Sequelize.CHAR(13),     
+                state: { // 상태값: 진행중(PR),결제 요청중(RE) 취소(CA), 완료(CP)
+                    type:Sequelize.CHAR(2),
                     allowNull: false,
+                    defaultValue:"PR",
                 },
-                birthdate: { //생년월일(YYYYMMDD)
-                    type:Sequelize.CHAR(8),     
-                    allowNull: false,
-                },
-                usertype: { //사용자 종류 (고객(C, default), 버스터(B))
-                    type:Sequelize.CHAR(1),     
-                    allowNull: false,
-                    defaultValue:'C'
-                },
-                
-                
-                
+
             },
             {
                 sequelize,
                 timestamps: true, // true 이면 createdAt, updatedAt 컬럼 자동 추가
                 underscored: true, // 테이블명과 컬럼명을 camelCase, snake_case 선택
-                modelName: 'User', // 모델이름
-                tableName: 'users', // 테이블이름
+                modelName: 'Request', // 모델이름
+                tableName: 'requests', // 테이블이름
                 paranoid: true, // true이면 deletedAt컬럼이 자동으로 생성되고 삭제시 삭제하지 않음
                 charset: 'utf8', // 인코딩, utf8mb : 이모지 포함
                 collate: 'utf8_general_ci', // 정렬시 비교기준
@@ -74,10 +58,8 @@ class User extends Sequelize.Model {
     }
     static associate(db){
         //테이블간 관계를 정의
-
-        db.User.hasOne(db.Buster, {foreignKey:'userid', sourceKey:'userid'});
-        db.User.hasMany(db.Request, {foreignKey:'userid', sourceKey:'userid'});
-        
+        // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
+        db.Request.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false, unique:true}, sourceKey:'userid', });
     }
 }
-module.exports = User;
+module.exports = Request;

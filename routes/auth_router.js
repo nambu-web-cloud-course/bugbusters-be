@@ -27,7 +27,7 @@ router.post('/sign-up', async (req, res)=> {
     try{
         const result = await User.create(new_user);
         // console.log('result', result);
-        res.send ({success:true, data:result}) ;
+        res.send ({success:true, userid:result.userid}) ;
     } catch (error ){
         res.send ({success:false, message:error, error:error});
     }
@@ -64,7 +64,7 @@ router.post('/sign-in', async (req, res) => {
     }
 })
 
-router.post('/register-buster', async (req, res) => {
+router.post('/buster', async (req, res) => {
     const new_buster = req.body;
     // console.log('buster:', new_buster);userid
 
@@ -73,7 +73,7 @@ router.post('/register-buster', async (req, res) => {
         // console.log('result:', result);
         if (result) {
             
-            const userupdate =await User.update({usertype:'B'}, {where: {userid:result.user_userid}});
+            const userupdate =await User.update({usertype:'B'}, {where: {userid:result.userid}});
             console.log('userupdate:', userupdate);
         }
         // console.log('result', result);
@@ -116,7 +116,7 @@ router.get('/', async (req, res)=> {
     }
 })
 
-router.get('/get-buster', async (req, res)=> {
+router.get('/buster', async (req, res)=> {
     const userid = req.query.userid;
     console.log('userid:', userid);
     const options = {
@@ -124,7 +124,7 @@ router.get('/get-buster', async (req, res)=> {
             {
                 model:Buster, 
                 where: {
-                    user_userid: userid,
+                    userid: userid,
                 },
                 // attributes: ['id', 'userid', 'content', 'created_at']
             }
@@ -135,7 +135,7 @@ router.get('/get-buster', async (req, res)=> {
         // const filtered = posts.filter ((post)=>post.user_id === user_id);
         const result = await Buster.findOne({
             // attributes: ['user_id', 'user_name'],
-            where: { user_userid: userid}
+            where: { userid: userid}
         });
         if (result) {
             res.send({success:true, data: result});

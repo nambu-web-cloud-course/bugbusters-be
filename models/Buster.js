@@ -49,7 +49,7 @@ class Buster extends Sequelize.Model {
     static associate(db){
         //테이블간 관계를 정의
         // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
-        db.Buster.belongsTo(db.User, {foreignKey:{name:'user_userid', allowNull:false, unique:true}, sourceKey:'userid', });
+        db.Buster.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false, unique:true}, sourceKey:'userid', });
     }
 }
 module.exports = Buster;
