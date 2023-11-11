@@ -60,6 +60,7 @@ class Request extends Sequelize.Model {
         //테이블간 관계를 정의
         // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
         db.Request.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid' });
+        db.Request.hasMany(db.Trade, {foreignKey:{name:'reqid', allowNull:false}, sourceKey:'id'});
     }
 }
 module.exports = Request;

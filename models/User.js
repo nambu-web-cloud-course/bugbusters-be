@@ -75,8 +75,10 @@ class User extends Sequelize.Model {
     static associate(db){
         //테이블간 관계를 정의
 
-        db.User.hasOne(db.Buster, {foreignKey:'userid', sourceKey:'userid'});
-        db.User.hasMany(db.Request, {foreignKey:'userid', sourceKey:'userid'});
+        db.User.hasOne(db.Buster, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid'});
+        db.User.hasMany(db.Request, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid'});
+        db.User.hasMany(db.Trade, {foreignKey:{name:'userid',allowNull:false}, sourceKey:'userid'});
+        db.User.hasMany(db.Trade, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid'});
         
     }
 }

@@ -4,20 +4,21 @@ const router = express.Router();
 
 const { User } = require('../models'); 
 const { Request } = require('../models');
+const { Trade } = require('../models');
 // const { Buster } = require('../models'); 
 
 
 module.exports = router;
 
 router.post('/', async (req, res)=> {
-    const request = req.body;
+    const trade = req.body;
     // new_user.id = users.length+1;
-    console.log('request:', request);
+    console.log('request:', trade);
     // new_user.password = await create_hash(new_user.password, 10);
     // console.log('hased:',new_user.password);
 
     try{
-        const result = await Request.create(request);
+        const result = await Trade.create(trade);
         // console.log('result', result);
         res.send ({success:true}) ;
     } catch (error ){
@@ -29,39 +30,32 @@ router.post('/', async (req, res)=> {
     
 })
 
-//get request list (all or by userid)
+//get request list (all or by userid or by busterid)
 router.get('/', async (req, res)=> {
     
     const userid = req.query.userid;
+    const busterid = req.query.busterid;
     console.log('userid:', userid);
-    const request = req.body;
-    // new_user.id = users.length+1;
-    console.log('request:', request);
-    // new_user.password = await create_hash(new_user.password, 10);
-    // console.log('hased:',new_user.password);
+    console.log('busterid:', busterid);
 
-    // const options = {
-    //     include: [
-    //         {
-    //             model:Request, 
-    //             where: {
-    //                 userid: userid,
-    //             },
-    //         }
-    //     ]
-    // };
     if (userid) {
-        // const filtered = posts.filter ((post)=>post.user_id === user_id);
-        const result = await Request.findAll({
+        const result = await Trade.findAll({
             // attributes: ['user_id', 'user_name'],
-            where: { userid: userid},
+            where: { userid: userid },
+            order:[['id', 'desc']]
+        });
+        res.send({success:true, data: result});    
+    }
+    else if (busterid) {
+        const result = await Trade.findAll({
+            // attributes: ['user_id', 'user_name'],
+            where: { busterid: busterid },
             order:[['id', 'desc']]
         });
         res.send({success:true, data: result});    
     }
     else {
-    // console.log('post length', posts.length);
-        const result = await Post.findAll({
+        const result = await Trade.findAll({
 
             order:[['id', 'desc']]
         });

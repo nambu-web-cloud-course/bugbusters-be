@@ -24,6 +24,6 @@ app.get('/', (req,res)=>{
 })
 // app.use('/posts', isAuth,  trade_router);
 app.use('/request', request_router);
-app.use('/trades', trade_router);
+app.use('/trade', trade_router);
 app.use('/auth', auth_router);
 app.listen(port);
