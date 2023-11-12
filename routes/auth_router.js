@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { where, Op } = require('sequelize');
 
 const { User } = require('../models'); 
 const { Buster } = require('../models'); 
@@ -27,7 +28,7 @@ router.post('/sign-up', async (req, res)=> {
     try{
         const result = await User.create(new_user);
         // console.log('result', result);
-        res.send ({success:true}) ;
+        res.send ({success:true, userid:result.userid}) ;
     } catch (error ){
         res.send ({success:false, message:error, error:error});
     }
@@ -55,7 +56,8 @@ router.post('/sign-in', async (req, res) => {
         if (compared) {
             const token = jwt.sign ({uid:user.userid, rol:'admin'}, secret);
             console.log('token:', token);
-            res.send({success:true, userid:user.userid, token: token}); 
+            res.cookie('token',token, { httpOnly: true, maxAge: 3600000 });     //send token in the cookie
+            res.send({success:true, userid:user.userid, token: token});     //send token as a result
         } else {
             res.send ({success:false, message:"사용자가 없거나 비번이 잘못되었습니다. "});
         }
@@ -64,7 +66,23 @@ router.post('/sign-in', async (req, res) => {
     }
 })
 
-router.post('/register-buster', async (req, res) => {
+router.put('/:id', async (req, res)=> {
+    const userid = req.params.id;
+    const content = req.body;
+
+    console.log('modified content:', content);
+    try{
+        const result = await User.update(content, {where:{userid:userid}})
+        res.send ({succss:true});
+    } catch(err) {
+        res.send({success:false, message:err, error:err});
+    }
+    
+})
+
+
+
+router.post('/buster', async (req, res) => {
     const new_buster = req.body;
     // console.log('buster:', new_buster);userid
 
@@ -73,7 +91,7 @@ router.post('/register-buster', async (req, res) => {
         // console.log('result:', result);
         if (result) {
             
-            const userupdate =await User.update({usertype:'B'}, {where: {userid:result.user_userid}});
+            const userupdate =await User.update({usertype:'B'}, {where: {userid:result.userid}});
             console.log('userupdate:', userupdate);
         }
         // console.log('result', result);
@@ -81,22 +99,29 @@ router.post('/register-buster', async (req, res) => {
     } catch (error ){
         res.send ({success:false, error:error});
     }
-})
+});
+
+router.put('/buster/:id', async (req, res)=> {
+    const userid = req.params.id;
+    const content = req.body;
+    console.log('userid', userid);
+    // console.log('content:', post.content);
+    console.log('modified content:', content);
+    // post.content = content;
+    try {
+        const result = await Buster.update(content, {where: {userid:userid} })
+        res.send ({succss:true});
+    } catch (err) {
+        res.send ({success:false, message:err, error:err});
+    }
+    //해당 id가 글이 없는 경우, 처리 - 404?
+    
+});
 
 router.get('/', async (req, res)=> {
     const userid = req.query.userid;
     console.log('userid:', userid);
-    const options = {
-        include: [
-            {
-                model:User, 
-                where: {
-                    userid: userid,
-                },
-                // attributes: ['id', 'userid', 'content', 'created_at']
-            }
-        ]
-    };
+
     if (userid) {
         
         // const filtered = posts.filter ((post)=>post.user_id === user_id);
@@ -116,7 +141,7 @@ router.get('/', async (req, res)=> {
     }
 })
 
-router.get('/get-buster', async (req, res)=> {
+router.get('/buster', async (req, res)=> {
     const userid = req.query.userid;
     console.log('userid:', userid);
     const options = {
@@ -124,7 +149,7 @@ router.get('/get-buster', async (req, res)=> {
             {
                 model:Buster, 
                 where: {
-                    user_userid: userid,
+                    userid: userid,
                 },
                 // attributes: ['id', 'userid', 'content', 'created_at']
             }
@@ -135,13 +160,13 @@ router.get('/get-buster', async (req, res)=> {
         // const filtered = posts.filter ((post)=>post.user_id === user_id);
         const result = await Buster.findOne({
             // attributes: ['user_id', 'user_name'],
-            where: { user_userid: userid}
+            where: { userid: userid }
         });
         if (result) {
-            res.send({success:true, data: result});
+            res.send({ success:true, data: result});
         }
         else
-            res.send({success:false, message:'해당 사용자의 정보가 없습니다.'})
+            res.send({ success:false, message:'해당 사용자의 정보가 없습니다.'})
         
     }
     else {
