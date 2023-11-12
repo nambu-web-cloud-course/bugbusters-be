@@ -4,6 +4,7 @@ const router = express.Router();
 
 const { User } = require('../models'); 
 const { Request } = require('../models');
+const { where, Op } = require('sequelize');
 // const { Buster } = require('../models'); 
 
 
@@ -27,45 +28,60 @@ router.post('/', async (req, res)=> {
     // console.log(users);
     // res.send({success:true});
     
-})
+});
+
+router.put('/', async (req, res) => {
+    const request = req.body;
+});
 
 //get request list (all or by userid)
 router.get('/', async (req, res)=> {
     
     const userid = req.query.userid;
-    console.log('userid:', userid);
-    const request = req.body;
-    // new_user.id = users.length+1;
-    console.log('request:', request);
-    // new_user.password = await create_hash(new_user.password, 10);
-    // console.log('hased:',new_user.password);
+    const sigungu = req.query.sigungu;
+    const gender = req.query.gender;
+    const price = req.query.price;  // price: 1, 2, 3, 4, 5
 
-    // const options = {
-    //     include: [
-    //         {
-    //             model:Request, 
-    //             where: {
-    //                 userid: userid,
-    //             },
-    //         }
-    //     ]
-    // };
+    var whereStatement = {};
+    
+    // 사용자가 자신의 요청을 조회하는 경우
     if (userid) {
         // const filtered = posts.filter ((post)=>post.user_id === user_id);
-        const result = await Request.findAll({
-            // attributes: ['userid', 'content', 'price', 'gender', 'addr1', 'addr2', 'sido', 'sigungu'],
-            where: { userid: userid},
-            order:[['id', 'desc']]
-        });
-        res.send({success:true, data: result});    
+        whereStatement.userid = userid;
     }
-    else {
-    // console.log('post length', posts.length);
-        const result = await Request.findAll({
+    // 버스터가 조건을 주어 요청을 조회하는 경우
+    else if (sigungu || gender || price) {
+        
+        if (sigungu)
+            whereStatement.sigungu = sigungu;
+        if (gender && gender !='A')
+            whereStatement.gender = gender;
+        if (price) {
+        
+            
+            let pr1 = 0, pr2 = 0;
+            if (price in ['1','2','3','4']){
+            
+                pr1 = parseInt(price) * 10000;
+                
+                pr2 = pr1 + 10000-1;
+                console.log('pr1;',pr1, 'pr2:', pr2);
+                whereStatement.price= {[Op.between]: [pr1, pr2]};
+            }
+            else {     
+                pr1 = +price*10000;
+                whereStatement.price = {[Op.gte]: pr1};
+            }
+            
+        }
+    };
+        
 
-            order:[['id', 'desc']]
-        });
-        res.send({success:true, data:result});
-    }
+    const result = await Request.findAll({
+        // attributes: ['userid', 'content', 'price', 'gender', 'addr1', 'addr2', 'sido', 'sigungu'],
+        where: whereStatement,
+        order:[['id', 'desc']]
+    });
+    res.send({success:true, data: result});
     
 })
