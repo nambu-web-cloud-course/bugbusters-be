@@ -20,6 +20,7 @@ app.use(cors({
     origin:'*',
 }));
 app.use (cookieParser());
+// app.use('/', express.static('uploads'));
 
 app.get('/', (req,res)=>{
     res.send("hello");
