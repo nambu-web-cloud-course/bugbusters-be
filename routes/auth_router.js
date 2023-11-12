@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { where, Op } = require('sequelize');
 
 const { User } = require('../models'); 
 const { Buster } = require('../models'); 
@@ -55,7 +56,8 @@ router.post('/sign-in', async (req, res) => {
         if (compared) {
             const token = jwt.sign ({uid:user.userid, rol:'admin'}, secret);
             console.log('token:', token);
-            res.send({success:true, userid:user.userid, token: token}); 
+            res.cookie('token',token, { httpOnly: true, maxAge: 3600000 });     //send token in the cookie
+            res.send({success:true, userid:user.userid, token: token});     //send token as a result
         } else {
             res.send ({success:false, message:"사용자가 없거나 비번이 잘못되었습니다. "});
         }
@@ -86,17 +88,7 @@ router.post('/buster', async (req, res) => {
 router.get('/', async (req, res)=> {
     const userid = req.query.userid;
     console.log('userid:', userid);
-    const options = {
-        include: [
-            {
-                model:User, 
-                where: {
-                    userid: userid,
-                },
-                // attributes: ['id', 'userid', 'content', 'created_at']
-            }
-        ]
-    };
+
     if (userid) {
         
         // const filtered = posts.filter ((post)=>post.user_id === user_id);
