@@ -66,6 +66,33 @@ router.post('/sign-in', async (req, res) => {
     }
 })
 
+router.put('/:id', async (req, res)=> {
+    const userid = req.params.id;
+    const content = req.body;
+    // const post = posts.find((p)=> p.id === +post_id);
+
+    // console.log('content:', post.content);
+    console.log('modified content:', content);
+    // post.content = content;
+    const result = await User.update(content, {where:{userid:userid}})
+    res.send ({succss:true});
+    //해당 id가 글이 없는 경우, 처리 - 404?
+    
+})
+
+router.put('/buster/:id', async (req, res)=> {
+    const userid = req.params.id;
+    const content = req.body;
+    console.log('userid', userid);
+    // console.log('content:', post.content);
+    console.log('modified content:', content);
+    // post.content = content;
+    const result = await Buster.update(content, {where: {userid:userid} })
+    res.send ({succss:true});
+    //해당 id가 글이 없는 경우, 처리 - 404?
+    
+});
+
 router.post('/buster', async (req, res) => {
     const new_buster = req.body;
     // console.log('buster:', new_buster);userid
@@ -83,7 +110,9 @@ router.post('/buster', async (req, res) => {
     } catch (error ){
         res.send ({success:false, error:error});
     }
-})
+});
+
+
 
 router.get('/', async (req, res)=> {
     const userid = req.query.userid;
