@@ -5,6 +5,7 @@ const router = express.Router();
 const { User } = require('../models'); 
 const { Request } = require('../models');
 const { Trade } = require('../models');
+const { Sequelize } = require('sequelize');
 // const { Buster } = require('../models'); 
 
 
@@ -30,7 +31,29 @@ router.post('/', async (req, res)=> {
     
 })
 
-//get request list (all or by userid or by busterid)
+// modify trade by id
+router.put('/:id', async (req, res) => {
+    
+    const id = parseInt(req.params.id);
+    const content = req.body;  
+    console.log('id:', id);
+    // console.log('content:', post.content);
+    console.log('modified content:', content);
+    // post.content = content;
+    try {
+        if (id) {
+            const result = await Trade.update(content, {where: {id: id} })
+            res.send ({succss:true});
+        }
+        else 
+            res.send({success:false, message:'id확인해 주세요.'});
+    } catch (err) {
+        res.send ({success:false, message:err, error:err});
+    }
+    
+});
+
+//get trade list (all or by userid or by busterid)
 router.get('/', async (req, res)=> {
     
     const userid = req.query.userid;
@@ -38,28 +61,29 @@ router.get('/', async (req, res)=> {
     console.log('userid:', userid);
     console.log('busterid:', busterid);
 
+    var whereStatement = {};
+
     if (userid) {
-        const result = await Trade.findAll({
-            // attributes: ['user_id', 'user_name'],
-            where: { userid: userid },
-            order:[['id', 'desc']]
-        });
-        res.send({success:true, data: result});    
+        whereStatement.userid = userid;
+           
     }
     else if (busterid) {
-        const result = await Trade.findAll({
-            // attributes: ['user_id', 'user_name'],
-            where: { busterid: busterid },
-            order:[['id', 'desc']]
-        });
-        res.send({success:true, data: result});    
-    }
-    else {
-        const result = await Trade.findAll({
-
-            order:[['id', 'desc']]
-        });
-        res.send({success:true, data:result});
+        whereStatement.busterid = busterid;  
     }
     
+    const result = await Trade.findAll({
+        // attributes: ['id', 'userid', 'busterid', 'reqid', 'rev1', 'rev2', 'rev3', [Sequelize.literal('Request.state'),'state']],
+        where: whereStatement,
+        // include: [
+        //     {
+        //         model:Request,
+        //         // as: Request,
+        //         attributes:[],
+        //     }
+        // ],
+        // raw:true,
+        order:[['id', 'desc']]
+        
+    });
+    res.send({success:true, data: result}); 
 })

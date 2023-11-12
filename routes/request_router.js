@@ -30,8 +30,21 @@ router.post('/', async (req, res)=> {
     
 });
 
-router.put('/', async (req, res) => {
-    const request = req.body;
+router.put('/:id', async (req, res) => {
+    
+    const id = parseInt(req.params.id);
+    const content = req.body;
+    console.log('id:', id);
+    // console.log('content:', post.content);
+    console.log('modified content:', content);
+    // post.content = content;
+    try {
+        const result = await Request.update(content, {where: {id: id} })
+        res.send ({succss:true});
+    } catch (err) {
+        res.send ({success:false, message:err, error:err});
+    }
+    
 });
 
 //get request list (all or by userid)

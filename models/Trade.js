@@ -23,6 +23,11 @@ class Trade extends Sequelize.Model {
                     allowNull: true,
                     // defaultValue:'0'
                 },
+                state: { // 상태값: 진행중(PR),결제 요청중(AP), 결제 완료(PC),  취소(CA), 완료(CP)
+                    type:Sequelize.CHAR(2),
+                    allowNull:false,
+                    defaultValue:'PR'
+                }
             },
             {
                 sequelize,

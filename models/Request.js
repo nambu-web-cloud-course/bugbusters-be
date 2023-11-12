@@ -37,10 +37,10 @@ class Request extends Sequelize.Model {
                     type:Sequelize.STRING(20),     
                     allowNull: false,
                 },
-                state: { // 상태값: 진행중(IP),결제 요청중(PR) 취소(CA), 완료(CP)
+                state: { // 상태값: 진행중(PR), 취소(CA), 완료(CP)
                     type:Sequelize.CHAR(2),
                     allowNull: false,
-                    defaultValue:"IP",
+                    defaultValue:"PR",  // default: 진행중
                 },
 
             },
