@@ -61,6 +61,8 @@ class Request extends Sequelize.Model {
         // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
         db.Request.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid' });
         db.Request.hasMany(db.Trade, {foreignKey:{name:'reqid', allowNull:false}, sourceKey:'id'});
+        db.Request.hasMany(db.Image, {foreignKey:{name:'reqid', allowNull:false}, sourceKey:'id'});
+
     }
 }
 module.exports = Request;
