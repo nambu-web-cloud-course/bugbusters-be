@@ -5,21 +5,29 @@ const router = express.Router();
 const { User } = require('../models'); 
 const { Request } = require('../models');
 const { where, Op } = require('sequelize');
-// const { Buster } = require('../models'); 
+const { Image } = require('../models'); 
 
 
-module.exports = router;
 
+// create request
 router.post('/', async (req, res)=> {
     const request = req.body;
+    const images = req.body.profile;
     // new_user.id = users.length+1;
-    console.log('request:', request);
+    console.log('images:', images);
     // new_user.password = await create_hash(new_user.password, 10);
     // console.log('hased:',new_user.password);
 
     try{
         const result = await Request.create(request);
-        // console.log('result', result);
+        
+        console.log('result', result.id, 'userid:', result.userid);
+        
+        images.map(async (image, index) => {
+            console.log('img',index, ':', image )
+            await Image.create({img:image, reqid:result.id });
+        });
+        // const img_result = await Image.create();
         res.send ({success:true}) ;
     } catch (error ){
         res.send ({success:false, message:error, error:error});
@@ -29,6 +37,8 @@ router.post('/', async (req, res)=> {
     // res.send({success:true});
     
 });
+
+
 
 router.put('/:id', async (req, res) => {
     
@@ -93,8 +103,15 @@ router.get('/', async (req, res)=> {
     const result = await Request.findAll({
         // attributes: ['userid', 'content', 'price', 'gender', 'addr1', 'addr2', 'sido', 'sigungu'],
         where: whereStatement,
-        order:[['id', 'desc']]
+        order:[['id', 'desc']], 
+        include: {
+            model:Image,
+            order:[['id', 'asc']]
+            } 
     });
     res.send({success:true, data: result});
     
 })
+
+
+module.exports = router;

@@ -84,8 +84,11 @@ router.put('/:id', async (req, res)=> {
 
 router.post('/buster', async (req, res) => {
     const new_buster = req.body;
+    // const files = JSON.parse(req.body.profile);
+    new_buster.profile = req.body.profile[0];
     // console.log('buster:', new_buster);userid
 
+    console.log("profile", new_buster.profile);
     try{
         const result = await Buster.create(new_buster);
         // console.log('result:', result);
@@ -100,6 +103,8 @@ router.post('/buster', async (req, res) => {
         res.send ({success:false, error:error});
     }
 });
+
+
 
 router.put('/buster/:id', async (req, res)=> {
     const userid = req.params.id;
