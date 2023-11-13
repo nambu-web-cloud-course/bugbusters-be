@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 dotenv.config();
 const sync = require('./models/sync.js');
@@ -20,12 +21,19 @@ app.use(cors({
     origin:'*',
 }));
 app.use (cookieParser());
-// app.use('/', express.static('uploads'));
-
+// app.use('/', express.static('/uploads'));
+app.use('/uploads', express.static('uploads'))
+// app.useStaticAssets(path.join(__dirname, "../uploads"), {
+//     prefix: "/media",
+//   });
 app.get('/', (req,res)=>{
     res.send("hello");
 })
 
+// app.get('/', function(req, res, next){
+//     var file_name=req.file.filename;
+//     var file_path=req.file.path;
+// })
 //cookie 에서 토큰 검사
 // app.get('/', (req, res)=> {
 //     if(req.cookies.token) {
@@ -46,3 +54,4 @@ app.use('/request', request_router);
 app.use('/trade', trade_router);
 app.use('/auth', auth_router);
 app.listen(port);
+

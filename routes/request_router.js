@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const fs = require('fs');
 const router = express.Router();
 
 const { User } = require('../models'); 
@@ -7,8 +8,12 @@ const { Request } = require('../models');
 const { where, Op } = require('sequelize');
 // const { Buster } = require('../models'); 
 
+const dir = 'uploads/';
+!fs.existsSync(dir)&& fs.mkdirSync(dir);
 
 var storage = multer.diskStorage({
+    
+
     destination: function (req, file, cb) {
       cb(null, 'uploads/')
     },
