@@ -21,19 +21,14 @@ app.use(cors({
     origin:'*',
 }));
 app.use (cookieParser());
-// app.use('/', express.static('/uploads'));
+
 app.use('/uploads', express.static('uploads'))
-// app.useStaticAssets(path.join(__dirname, "../uploads"), {
-//     prefix: "/media",
-//   });
+
 app.get('/', (req,res)=>{
     res.send("hello");
 })
 
-// app.get('/', function(req, res, next){
-//     var file_name=req.file.filename;
-//     var file_path=req.file.path;
-// })
+
 //cookie 에서 토큰 검사
 // app.get('/', (req, res)=> {
 //     if(req.cookies.token) {
