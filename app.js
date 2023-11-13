@@ -13,6 +13,7 @@ const app = express();
 const auth_router = require('./routes/auth_router.js');
 const trade_router = require('./routes/trade_router.js');
 const request_router = require('./routes/request_router.js');
+const image_router = require('./routes/image_router.js');
 const { addHook } = require('./models/User.js');
 
 // socket server
@@ -55,19 +56,14 @@ app.use(cors({
     origin:'*',
 }));
 app.use (cookieParser());
-// app.use('/', express.static('/uploads'));
+
 app.use('/uploads', express.static('uploads'))
-// app.useStaticAssets(path.join(__dirname, "../uploads"), {
-//     prefix: "/media",
-//   });
+
 app.get('/', (req,res)=>{
     res.send("hello");
 })
 
-// app.get('/', function(req, res, next){
-//     var file_name=req.file.filename;
-//     var file_path=req.file.path;
-// })
+
 //cookie 에서 토큰 검사
 // app.get('/', (req, res)=> {
 //     if(req.cookies.token) {
@@ -84,6 +80,7 @@ app.get('/', (req,res)=>{
 // });
 
 // app.use('/posts', isAuth,  trade_router);
+app.use ('/image', image_router);
 app.use('/request', request_router);
 app.use('/trade', trade_router);
 app.use('/auth', auth_router);
