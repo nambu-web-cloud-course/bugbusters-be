@@ -57,6 +57,22 @@ router.put('/:id', async (req, res) => {
     
 });
 
+
+router.get('/:id', async (req, res) => {
+
+    const reqid = req.params.id;
+
+    const result = await Request.findOne({
+        // attributes: ['userid', 'content', 'price', 'gender', 'addr1', 'addr2', 'sido', 'sigungu'],
+        where: {id:reqid},
+        order:[['id', 'desc']], 
+        include: {
+            model:Image,
+            order:[['id', 'asc']]
+            } 
+    });
+    res.send({success:true, data: result});
+})
 //get request list (all or by userid)
 router.get('/', async (req, res)=> {
     
