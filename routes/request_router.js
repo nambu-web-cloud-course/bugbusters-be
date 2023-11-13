@@ -12,8 +12,6 @@ const dir = 'uploads/';
 !fs.existsSync(dir)&& fs.mkdirSync(dir);
 
 var storage = multer.diskStorage({
-    
-
     destination: function (req, file, cb) {
       cb(null, 'uploads/')
     },
@@ -21,7 +19,6 @@ var storage = multer.diskStorage({
       cb(null, file.fieldname + '-' + Date.now())
     }
   })
-   
 var upload = multer({ storage: storage }).single("file")  
 
 
@@ -58,7 +55,6 @@ router.post('/image',  (req, res) => {
 })
 
 router.put('/:id', async (req, res) => {
-    
     const id = parseInt(req.params.id);
     const content = req.body;
     console.log('id:', id);
