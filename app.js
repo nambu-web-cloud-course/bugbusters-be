@@ -13,6 +13,7 @@ const app = express();
 const auth_router = require('./routes/auth_router.js');
 const trade_router = require('./routes/trade_router.js');
 const request_router = require('./routes/request_router.js');
+const image_router = require('./routes/image_router.js');
 const { addHook } = require('./models/User.js');
 // const isAuth = require('./routes/authorization.js');
 app.use (morgan('dev'));
@@ -45,6 +46,7 @@ app.get('/', (req,res)=>{
 // });
 
 // app.use('/posts', isAuth,  trade_router);
+app.use ('/image', image_router);
 app.use('/request', request_router);
 app.use('/trade', trade_router);
 app.use('/auth', auth_router);

@@ -1,42 +1,50 @@
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
+// const multer = require('multer');
+// const fs = require('fs');
 const router = express.Router();
 
 const { User } = require('../models'); 
 const { Request } = require('../models');
 const { where, Op } = require('sequelize');
-// const { Buster } = require('../models'); 
+const { Image } = require('../models'); 
 
-const dir = 'uploads/';
-!fs.existsSync(dir)&& fs.mkdirSync(dir);
+// const dir = 'uploads/';
+// !fs.existsSync(dir)&& fs.mkdirSync(dir);
 
-var storage = multer.diskStorage({
+// var storage = multer.diskStorage({
     
 
-    destination: function (req, file, cb) {
-      cb(null, 'uploads/')
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now())
-    }
-  })
+//     destination: function (req, file, cb) {
+//       cb(null, 'uploads/')
+//     },
+//     filename: function (req, file, cb) {
+//       cb(null, file.fieldname + '-' + Date.now())
+//     }
+//   })
    
-var upload = multer({ storage: storage }).single("file")  
+// var upload = multer({ storage: storage }).single("file")  
 
 
 
 // create request
 router.post('/', async (req, res)=> {
     const request = req.body;
+    const images = req.body.profile;
     // new_user.id = users.length+1;
-    console.log('request:', request);
+    console.log('images:', images);
     // new_user.password = await create_hash(new_user.password, 10);
     // console.log('hased:',new_user.password);
 
     try{
         const result = await Request.create(request);
-        // console.log('result', result);
+        
+        console.log('result', result.id, 'userid:', result.userid);
+        
+        images.map(async (image, index) => {
+            console.log('img',index, ':', image )
+            await Image.create({img:image, reqid:result.id });
+        });
+        // const img_result = await Image.create();
         res.send ({success:true}) ;
     } catch (error ){
         res.send ({success:false, message:error, error:error});
@@ -48,14 +56,15 @@ router.post('/', async (req, res)=> {
 });
 
 
-router.post('/image',  (req, res) => {
-    upload(req, res, err =>{
-        if(err){
-            return res.json({success: false, err})
-        }
-        return res.json({success: true, filePath: res.req.file.path , fileName: res.req.file.filename})
-    })
-})
+// router.post('/image',  (req, res) => {
+//     upload(req, res, err =>{
+//         if(err){
+//             return res.json({success: false, err})
+//         }
+//         console.log('filename:', res.req.file.filename);
+//         return res.json({success: true, filePath: res.req.file.path , fileName: res.req.file.filename})
+//     })
+// })
 
 router.put('/:id', async (req, res) => {
     
