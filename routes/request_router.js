@@ -1,28 +1,11 @@
 const express = require('express');
-// const multer = require('multer');
-// const fs = require('fs');
+
 const router = express.Router();
 
 const { User } = require('../models'); 
 const { Request } = require('../models');
 const { where, Op } = require('sequelize');
 const { Image } = require('../models'); 
-
-// const dir = 'uploads/';
-// !fs.existsSync(dir)&& fs.mkdirSync(dir);
-
-// var storage = multer.diskStorage({
-    
-
-//     destination: function (req, file, cb) {
-//       cb(null, 'uploads/')
-//     },
-//     filename: function (req, file, cb) {
-//       cb(null, file.fieldname + '-' + Date.now())
-//     }
-//   })
-   
-// var upload = multer({ storage: storage }).single("file")  
 
 
 
@@ -56,15 +39,6 @@ router.post('/', async (req, res)=> {
 });
 
 
-// router.post('/image',  (req, res) => {
-//     upload(req, res, err =>{
-//         if(err){
-//             return res.json({success: false, err})
-//         }
-//         console.log('filename:', res.req.file.filename);
-//         return res.json({success: true, filePath: res.req.file.path , fileName: res.req.file.filename})
-//     })
-// })
 
 router.put('/:id', async (req, res) => {
     
@@ -129,7 +103,11 @@ router.get('/', async (req, res)=> {
     const result = await Request.findAll({
         // attributes: ['userid', 'content', 'price', 'gender', 'addr1', 'addr2', 'sido', 'sigungu'],
         where: whereStatement,
-        order:[['id', 'desc']]
+        order:[['id', 'desc']], 
+        include: {
+            model:Image,
+            order:[['id', 'asc']]
+            } 
     });
     res.send({success:true, data: result});
     

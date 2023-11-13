@@ -3,6 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
 
+// uploads 디렉토리가 없으면 생성
 const dir = 'uploads/';
 !fs.existsSync(dir)&& fs.mkdirSync(dir);
 
