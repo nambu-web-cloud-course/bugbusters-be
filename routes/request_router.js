@@ -9,6 +9,7 @@ const { Image } = require('../models');
 
 
 
+
 // create request
 router.post('/', async (req, res)=> {
     const request = req.body;
@@ -41,7 +42,6 @@ router.post('/', async (req, res)=> {
 
 
 router.put('/:id', async (req, res) => {
-    
     const id = parseInt(req.params.id);
     const content = req.body;
     console.log('id:', id);
