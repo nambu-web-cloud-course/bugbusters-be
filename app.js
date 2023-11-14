@@ -10,9 +10,9 @@ const BUSTER_BOT = "BugBusters_Official";
 const leaveRoom = (userID, chatRoomUsers) => {
   return chatRoomUsers.filter((user) => user.id != userID);
 };
+
 let allUsers = [];
 let chatRoomMessages = [];
-// Chat Setting
 
 dotenv.config();
 const sync = require("./models/sync.js");
@@ -42,25 +42,27 @@ const io = socketIO(server, {
 
 // Listen for when the client connects via socket.io-client
 io.on("connection", (socket) => {
+  
   console.log(`🅾️  User connected ${socket.id}`);
 
   // ✅ Add a user to a room 
   socket.on("join_room", (data) => {
-    const { username, req_userid, room } = data; // Data sent from client when join_room event emitted
+    // username: 로그인한 본인의 아이디
+    const { username, room } = data; // Data sent from client when join_room event emitted
     socket.join(room); // Join the user to a socket room
-    console.log(`🦋 Buster: ${username}, User: ${req_userid}, Room: ${room}`)
+    console.log(`🦋 username: ${username}, Room: ${room}`)
     
     let __createdtime__ = Date.now(); // Current timestamp
     // Send message to all users currently in the room, apart from the user that just joined
     socket.to(room).emit("receive_message", {
-      message: `${username} has joined the chat room`,
+      message: `${username}님이 채팅방에 접속했습니다.`,
       username: BUSTER_BOT,
       __createdtime__,
     });
 
     // ✅ Send welcome msg to user that just joined chat only
     socket.emit("receive_message", {
-      message: `${username} requested to ${req_userid}`,
+      message: `${username}님, 환영해요!`,
       username: BUSTER_BOT,
       __createdtime__,
     });
@@ -69,6 +71,7 @@ io.on("connection", (socket) => {
     // 현재는 1개의 요청 목록에 방이 여러 개 생김 -> 중복 제거
     chatRoom = room;
     allUsers.push({ id: socket.id, username, room });
+    // 같은 방에 있는 사람들에게 메시지 전송
     chatRoomUsers = allUsers.filter((user) => user.room === room);
     socket.to(room).emit("chatroom_users", chatRoomUsers);
     socket.emit("chatroom_users", chatRoomUsers);
@@ -89,6 +92,7 @@ io.on("connection", (socket) => {
     const newMessage = { message, username, __createdtime__ };
     chatRoomMessages.push(newMessage);
     io.in(room).emit("receive_message", newMessage);
+
     console.log("chatRoomMessages", chatRoomMessages)
   });
 
@@ -103,20 +107,22 @@ io.on("connection", (socket) => {
     socket.to(room).emit("chatroom_users", allUsers);
     socket.to(room).emit("receive_message", {
       username: BUSTER_BOT,
-      message: `${username} has left the chat`,
+      message: `${username}님이 방을 나갔습니다.`,
       __createdtime__,
     });
-    console.log(`${username} has left the chat`);
+    console.log(`${username}님이 방을 나갔습니다.`);
   });
 
   socket.on("disconnect", () => {
     console.log("❌ User disconnected from the chat");
+    const __createdtime__ = Date.now();
     const user = allUsers.find((user) => user.id == socket.id);
     if (user?.username) {
       allUsers = leaveRoom(socket.id, allUsers);
       socket.to(chatRoom).emit("chatroom_users", allUsers);
       socket.to(chatRoom).emit("receive_message", {
         message: `${user.username} has disconnected from the chat.`,
+        __createdtime__,
       });
     }
   });
