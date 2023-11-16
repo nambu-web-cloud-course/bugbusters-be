@@ -21,7 +21,7 @@ router.post('/', async (req, res)=> {
         
         console.log('result', result.id, 'userid:', result.userid);
         
-        if (images){
+        if (images) {
             images.map(async (image, index) => {
                 console.log('img',index, ':', image )
                 await Image.create({img:image, reqid:result.id });
