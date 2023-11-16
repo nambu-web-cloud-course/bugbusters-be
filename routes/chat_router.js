@@ -23,8 +23,7 @@ router.get('/', async (req, res) => {
 
     try{
         const room = await Room.find(query).lean();
-        // const data = JSON.stringify(room);
-        // room.to
+
         res.send({success:true, data:room});
         // res.json(room);
         
