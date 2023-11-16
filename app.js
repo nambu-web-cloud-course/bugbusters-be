@@ -2,9 +2,31 @@ const express = require("express");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const mongoose = require('mongoose');
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const saveMessage = require('./services/saveMessage.js');
+const getMessages = require('./services/getMessages');
+const setRoom = require('./services/setRoom');
+const getRooms = require('./services/getRooms');
+const isRoomExist = require("./services/isRoomExist.js");
 
+dotenv.config();
+const sync = require("./models/sync.js");
+sync();
+const port = process.env.PORT || 3000;
+
+const app = express();
+const auth_router = require("./routes/auth_router.js");
+const trade_router = require("./routes/trade_router.js");
+const request_router = require("./routes/request_router.js");
+const image_router = require("./routes/image_router.js");
+const chat_router = require("./routes/chat_router.js");
+const { addHook } = require("./models/User.js");
+
+// mongodb
+const mongodbUri = process.env.MSGDB_URL;
+// mongoose.connect(mongodbUri, {}).then(console.log('Connected to MongoDB'));
 // Chat Setting
 const BUSTER_BOT = "BugBusters_Official";
 const leaveRoom = (userID, chatRoomUsers) => {
@@ -13,21 +35,13 @@ const leaveRoom = (userID, chatRoomUsers) => {
 
 let allUsers = [];
 let chatRoomMessages = [];
-
-dotenv.config();
-const sync = require("./models/sync.js");
-sync();
-const port = process.env.PORT || 3000;
-const app = express();
-const auth_router = require("./routes/auth_router.js");
-const trade_router = require("./routes/trade_router.js");
-const request_router = require("./routes/request_router.js");
-const image_router = require("./routes/image_router.js");
-const { addHook } = require("./models/User.js");
+// let roomlist = [];
 
 // socket server
 const http = require("http");
 const socketIO = require("socket.io");
+const Room = require("./models/Room.js");
+
 const server = http.createServer(app);
 
 // create socketIO instance
@@ -43,59 +57,88 @@ const io = socketIO(server, {
 // Listen for when the client connects via socket.io-client
 io.on("connection", (socket) => {
   
+  let  rooms = io.sockets.adapter.rooms;
+  console.log('rooms:', rooms);
   console.log(`🅾️  User connected ${socket.id}`);
-
+  
   // ✅ Add a user to a room 
   socket.on("join_room", (data) => {
-    // username: 로그인한 본인의 아이디
-    const { username, room } = data; // Data sent from client when join_room event emitted
+    // usderid: 로그인한 본인의 아이디
+    const { userid, room } = data; // Data sent from client when join_room event emitted
     socket.join(room); // Join the user to a socket room
-    console.log(`🦋 username: ${username}, Room: ${room}`)
+    console.log(`🦋 userid: ${userid}, Room: ${room}`)
+
+    //룸 정보에서 reqid, userid, busterid 알기 위해 분리
+    const roomarr = room.split('_');
+    console.log('roomarr:',roomarr);
+  
+    //db에 동일한 방이 없을 때만 db에 저장
+    isRoomExist(room).then((response) => {
+      console.log('isRoomExist:', response);
+      if (!response)
+        setRoom(room, roomarr[1], roomarr[2],roomarr[0]);
+    })
+    .catch((err) => console.log(err));
     
-    let __createdtime__ = Date.now(); // Current timestamp
+    // 방정보 넘겨주기? api로 넘겨주는데? 필요없는듯, 나중에 정리
+    // getRooms()
+    //   .then((rooms) => {
+    //     console.log('latest rooms:', rooms);
+    //     socket.emit('latest rooms', rooms);
+    //   })
+    //   .catch((err) => console.log(err));
+
+    let createdAt = Date.now(); // Current timestamp
     // Send message to all users currently in the room, apart from the user that just joined
     socket.to(room).emit("receive_message", {
-      message: `${username}님이 채팅방에 접속했습니다.`,
-      username: BUSTER_BOT,
-      __createdtime__,
+      message: `${userid}님이 채팅방에 접속했습니다.`,
+      userid: BUSTER_BOT,
+      createdAt,
     });
 
     // ✅ Send welcome msg to user that just joined chat only
     socket.emit("receive_message", {
-      message: `${username}님, 환영해요!`,
-      username: BUSTER_BOT,
-      __createdtime__,
+      message: `${userid}님, 환영해요!`,
+      userid: BUSTER_BOT,
+      createdAt,
     });
 
     // ✅ Save the new user to the room
     // 현재는 1개의 요청 목록에 방이 여러 개 생김 -> 중복 제거
     chatRoom = room;
-    allUsers.push({ id: socket.id, username, room });
+    allUsers.push({ id: socket.id, userid, room });
     // 같은 방에 있는 사람들에게 메시지 전송
     chatRoomUsers = allUsers.filter((user) => user.room === room);
+  
     socket.to(room).emit("chatroom_users", chatRoomUsers);
     socket.emit("chatroom_users", chatRoomUsers);
-    console.log("chatroom_users", chatRoomUsers)
-
-    // 나중에 DB에 저장한 후 최근 메시지 100개(지정 필요)만 불러오기
+    // console.log("chatroom_users", chatRoomUsers)
+    
     // Get last 100 messages sent in the chat room
-    // socket.on("get_last_100_messages", (data) => {
-    //   console.log("get_last_100_messages", data)
-    //   socket.emit("last_100_messages", chatRoomMessages.slice(-100));
-    // });
+    getMessages(room, 10)
+      .then((messages) => {
+        // console.log('latest messages:', messages);
+        socket.emit('last_100_messages', messages);
+      })
+      .catch((err) => console.log(err));
 
   });
 
   socket.on("send_message", (data) => {
     console.log("send_message", data)
-    const { message, username, room, __createdtime__ } = data;
-    const newMessage = { message, username, __createdtime__ };
+    const { message, userid, room, createdAt } = data;
+    const newMessage = { message, userid, createdAt };
     chatRoomMessages.push(newMessage);
     io.in(room).emit("receive_message", newMessage);
 
-    console.log("chatRoomMessages", chatRoomMessages)
+    console.log("chatRoomMessages", chatRoomMessages);
+    saveMessage(message, userid, room); // ==> db에서 데이터 생성 시간 자동 생성됨(넘겨줄 필요 없음) 
+    // SaveMessage(message, username, room, __createdtime__) // Save message in db
+    // .then((response) => console.log(response))
+    // .catch((err) => console.log(err));
   });
 
+  
   socket.on("leave_room", (data) => {
     const { username, room } = data;
     socket.leave(room);
@@ -164,9 +207,13 @@ app.use("/image", image_router);
 app.use("/request", request_router);
 app.use("/trade", trade_router);
 app.use("/auth", auth_router);
+app.use("/chat", chat_router);
 // app.listen(port);
 
 // socket 실행
 server.listen(port, () => {
   console.log(`Socket IO server listening on port ${port}`);
+  // console.log('mongodburl', mongodbUri);
+  mongoose.connect(mongodbUri, {}).then(console.log('Connected to MsgDB'));
+  
 });
