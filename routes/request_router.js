@@ -7,9 +7,6 @@ const { Request } = require('../models');
 const { where, Op } = require('sequelize');
 const { Image } = require('../models'); 
 
-
-
-
 // create request
 router.post('/', async (req, res)=> {
     const request = req.body;
@@ -40,8 +37,6 @@ router.post('/', async (req, res)=> {
     // res.send({success:true});
     
 });
-
-
 
 router.put('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
