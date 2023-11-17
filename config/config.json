@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "dbuser",
-    "password": "Pass1234",
-    "database": "bugbusters",
+    "username": "",
+    "password": "",
+    "database": "",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
