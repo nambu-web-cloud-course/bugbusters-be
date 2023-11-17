@@ -87,11 +87,11 @@ io.on("connection", (socket) => {
 
     let createdAt = Date.now(); // Current timestamp
     // Send message to all users currently in the room, apart from the user that just joined
-    socket.to(room).emit("receive_message", {
-      message: `${userid}님이 채팅방에 접속했습니다.`,
-      userid: BUSTER_BOT,
-      createdAt,
-    });
+    // socket.to(room).emit("receive_message", {
+    //   message: `${userid}님이 채팅방에 접속했습니다.`,
+    //   userid: BUSTER_BOT,
+    //   createdAt,
+    // });
 
     // ✅ Send welcome msg to user that just joined chat only
     // socket.emit("receive_message", {
@@ -147,12 +147,12 @@ io.on("connection", (socket) => {
       leftUsers = allUsers.filter((user) => user.id != socket.id);
       // allUsers = leaveRoom(socket.id, allUsers);
       // socket.to(room).emit("chatroom_users", leftUsers);
-      console.log('allusers:', allUsers)
-      console.log('leaveroom:;', room);
+      // console.log('allusers:', allUsers)
+      // console.log('leaveroom:;', room);
       socket.to(room).emit("chatroom_users", leftUsers);
       
-      // socket.to(room).emit("receive_message", {
-      socket.emit("receive_message", {
+      socket.to(room).emit("receive_message", {
+      // socket.emit("receive_message", {
         userid: BUSTER_BOT,
         message: `${userid}님이 방을 나갔습니다.`,
         createdAt,
