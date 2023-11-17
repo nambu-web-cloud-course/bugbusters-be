@@ -128,14 +128,11 @@ io.on("connection", (socket) => {
     chatRoomMessages.push(newMessage);
     io.in(room).emit("receive_message", newMessage);
 
-    // console.log("chatRoomMessages", chatRoomMessages);
-    saveMessage(message, userid, room); // ==> db에서 데이터 생성 시간 자동 생성됨(넘겨줄 필요 없음) 
-    // SaveMessage(message, username, room, __createdtime__) // Save message in db
-    // .then((response) => console.log(response))
-    // .catch((err) => console.log(err));
+    saveMessage(message, userid, room) // ==> db에서 데이터 생성 시간 자동 생성됨(넘겨줄 필요 없음) 
+    .then((response) => console.log(response))
+    .catch((err) => console.log(err));
   });
 
-  
   socket.on("leave_room", (data) => {
     const { userid, room } = data;
     socket.leave(room);
@@ -150,18 +147,14 @@ io.on("connection", (socket) => {
       // console.log('allusers:', allUsers)
       // console.log('leaveroom:;', room);
       socket.to(room).emit("chatroom_users", leftUsers);
-      
-      socket.to(room).emit("receive_message", {
-      // socket.emit("receive_message", {
-        userid: BUSTER_BOT,
-        message: `${userid}님이 방을 나갔습니다.`,
-        createdAt,
-      });
-      // socket.emit("receive_message", {
-        //   message: `${userid}님, 환영해요!`,
-        //   userid: BUSTER_BOT,
-        //   createdAt,
-        // });
+      const leavingMessage = {
+        // socket.emit("receive_message", {
+          userid: BUSTER_BOT,
+          message: `${userid}님이 방을 나갔습니다.`,
+          createdAt,
+        }
+      socket.to(room).emit("receive_message", leavingMessage);
+      saveMessage(leavingMessage.message, leavingMessage.userid, room);
       console.log(`${userid}님이 방을 나갔습니다.`);
     });
   });
