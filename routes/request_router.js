@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
-const { User } = require('../models'); 
+const { Trade } = require('../models'); 
 const { Request } = require('../models');
 const { where, Op } = require('sequelize');
 const { Image } = require('../models'); 
@@ -38,16 +38,36 @@ router.post('/', async (req, res)=> {
     
 });
 
+// modify request by id 
+// ( if state of request is changed(only to CA) and there's any related trades, 
+// the stae of related trade will be updated (ex. PR(in progress)->CA(cancel)))
 router.put('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const content = req.body;
-    console.log('id:', id);
-    // console.log('content:', post.content);
-    console.log('modified content:', content);
-    // post.content = content;
+    
     try {
-        const result = await Request.update(content, {where: {id: id} })
-        res.send ({succss:true});
+        const result = await Request.update(content, {where: {id: id} });
+        if (result > 0) {
+            console.log('result:', result);
+            
+            if (content.state && (content.state == 'CA'))
+            {
+                console.log('state 변경:', content.state, 'id:', id);
+
+                Trade.update(
+                    {state:content.state}, 
+                    {where: {reqid:id},
+                })
+                .then ((updateResult)=> {
+                    console.log('request:', updateResult);
+                    
+                });
+            }
+            res.send ({succss:true});
+        }
+        else 
+            res.send({success:false,error: 'id에 해당하는 request가 없습니다.'})
+        
     } catch (err) {
         res.send ({success:false, message:err, error:err});
     }

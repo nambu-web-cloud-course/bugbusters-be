@@ -10,6 +10,7 @@ const getMessages = require('./services/getMessages');
 const setRoom = require('./services/setRoom');
 const getRooms = require('./services/getRooms');
 const isRoomExist = require("./services/isRoomExist.js");
+const leaveRoom = require("./services/leaveRoom.js");
 
 dotenv.config();
 const sync = require("./models/sync.js");
@@ -26,16 +27,13 @@ const { addHook } = require("./models/User.js");
 
 // mongodb
 const mongodbUri = process.env.MSGDB_URL;
-// mongoose.connect(mongodbUri, {}).then(console.log('Connected to MongoDB'));
+
 // Chat Setting
 const BUSTER_BOT = "BugBusters_Official";
-const leaveRoom = (userID, chatRoomUsers) => {
-  return chatRoomUsers.filter((user) => user.id != userID);
-};
+
 
 let allUsers = [];
 let chatRoomMessages = [];
-// let roomlist = [];
 
 // socket server
 const http = require("http");
@@ -57,8 +55,8 @@ const io = socketIO(server, {
 // Listen for when the client connects via socket.io-client
 io.on("connection", (socket) => {
   
-  let  rooms = io.sockets.adapter.rooms;
-  console.log('rooms:', rooms);
+  // let  rooms = io.sockets.adapter.rooms;
+  // console.log('rooms:', rooms);
   console.log(`🅾️  User connected ${socket.id}`);
   
   // ✅ Add a user to a room 
@@ -70,11 +68,10 @@ io.on("connection", (socket) => {
 
     //룸 정보에서 reqid, userid, busterid 알기 위해 분리
     const roomarr = room.split('_');
-    console.log('roomarr:',roomarr);
   
     //db에 동일한 방이 없을 때만 db에 저장
     isRoomExist(room).then((response) => {
-      console.log('isRoomExist:', response);
+      // console.log('isRoomExist:', response);
       if (!response)
         setRoom(room, roomarr[1], roomarr[2],roomarr[0]);
     })
@@ -90,18 +87,18 @@ io.on("connection", (socket) => {
 
     let createdAt = Date.now(); // Current timestamp
     // Send message to all users currently in the room, apart from the user that just joined
-    socket.to(room).emit("receive_message", {
-      message: `${userid}님이 채팅방에 접속했습니다.`,
-      userid: BUSTER_BOT,
-      createdAt,
-    });
+    // socket.to(room).emit("receive_message", {
+    //   message: `${userid}님이 채팅방에 접속했습니다.`,
+    //   userid: BUSTER_BOT,
+    //   createdAt,
+    // });
 
     // ✅ Send welcome msg to user that just joined chat only
-    socket.emit("receive_message", {
-      message: `${userid}님, 환영해요!`,
-      userid: BUSTER_BOT,
-      createdAt,
-    });
+    // socket.emit("receive_message", {
+    //   message: `${userid}님, 환영해요!`,
+    //   userid: BUSTER_BOT,
+    //   createdAt,
+    // });
 
     // ✅ Save the new user to the room
     // 현재는 1개의 요청 목록에 방이 여러 개 생김 -> 중복 제거
@@ -125,50 +122,56 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", (data) => {
-    console.log("send_message", data)
+    // console.log("send_message", data)
     const { message, userid, room, createdAt } = data;
     const newMessage = { message, userid, createdAt };
     chatRoomMessages.push(newMessage);
     io.in(room).emit("receive_message", newMessage);
 
-    console.log("chatRoomMessages", chatRoomMessages);
-    saveMessage(message, userid, room); // ==> db에서 데이터 생성 시간 자동 생성됨(넘겨줄 필요 없음) 
-    // SaveMessage(message, username, room, __createdtime__) // Save message in db
-    // .then((response) => console.log(response))
-    // .catch((err) => console.log(err));
+    saveMessage(message, userid, room) // ==> db에서 데이터 생성 시간 자동 생성됨(넘겨줄 필요 없음) 
+    .then((response) => console.log(response))
+    .catch((err) => console.log(err));
   });
 
-  
   socket.on("leave_room", (data) => {
-    const { username, room } = data;
+    const { userid, room } = data;
     socket.leave(room);
     console.log("💧 User leaves the room")
-    const __createdtime__ = Date.now();
+    const createdAt = Date.now();
     // Remove user from memory
     // 방 나가기를 한 유저에게만 채팅목록 사라지게 하기
-    allUsers = leaveRoom(socket.id, allUsers);
-    socket.to(room).emit("chatroom_users", allUsers);
-    socket.to(room).emit("receive_message", {
-      username: BUSTER_BOT,
-      message: `${username}님이 방을 나갔습니다.`,
-      __createdtime__,
+    leaveRoom(userid, room).then (()=> {
+      leftUsers = allUsers.filter((user) => user.id != socket.id);
+      // allUsers = leaveRoom(socket.id, allUsers);
+      // socket.to(room).emit("chatroom_users", leftUsers);
+      // console.log('allusers:', allUsers)
+      // console.log('leaveroom:;', room);
+      socket.to(room).emit("chatroom_users", leftUsers);
+      const leavingMessage = {
+        // socket.emit("receive_message", {
+          userid: BUSTER_BOT,
+          message: `${userid}님이 방을 나갔습니다.`,
+          createdAt,
+        }
+      socket.to(room).emit("receive_message", leavingMessage);
+      saveMessage(leavingMessage.message, leavingMessage.userid, room);
+      console.log(`${userid}님이 방을 나갔습니다.`);
     });
-    console.log(`${username}님이 방을 나갔습니다.`);
   });
 
-  socket.on("disconnect", () => {
-    console.log("❌ User disconnected from the chat");
-    const __createdtime__ = Date.now();
-    const user = allUsers.find((user) => user.id == socket.id);
-    if (user?.username) {
-      allUsers = leaveRoom(socket.id, allUsers);
-      socket.to(chatRoom).emit("chatroom_users", allUsers);
-      socket.to(chatRoom).emit("receive_message", {
-        message: `${user.username} has disconnected from the chat.`,
-        __createdtime__,
-      });
-    }
-  });
+  // socket.on("disconnect", () => {
+  //   console.log("❌ User disconnected from the chat");
+  //   const createdAt = Date.now();
+  //   const user = allUsers.find((user) => user.id == socket.id);
+  //   if (user?.userid) {
+  //     allUsers = leaveRoom(socket.id, allUsers);
+  //     socket.to(chatRoom).emit("chatroom_users", allUsers);
+  //     socket.to(chatRoom).emit("receive_message", {
+  //       message: `${user.username} has disconnected from the chat.`,
+  //       __createdtime__,
+  //     });
+  //   }
+  // });
 });
 
 // const isAuth = require('./routes/authorization.js');

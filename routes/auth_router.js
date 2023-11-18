@@ -33,9 +33,7 @@ router.post("/sign-up", async (req, res) => {
   } catch (error) {
     res.send({ success: false, message: error, error: error });
   }
-  // users.push(new_user);
-  // console.log(users);
-  // res.send({success:true});
+
 });
 
 router.post("/sign-in", async (req, res) => {
