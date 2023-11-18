@@ -76,13 +76,29 @@ router.put('/:id', async (req, res) => {
     
 });
 
-//get trade list (all or by userid or by busterid)
-router.get('/', async (req, res)=> {
+//get a trade by id
+router.get('/:id', async (req, res)=> {
     
+    const id = req.params.id;
+    // console.log('id:', id)
+    await Trade.findOne({
+        // attributes: ['id', 'userid', 'busterid', 'reqid', 'rev1', 'rev2', 'rev3', [Sequelize.literal('Request.state'),'state']],
+        where: {id:id},
+        order:[['id', 'desc']]
+        
+    }).then((result)=> { 
+        if (result)
+            res.send({success:true, data: result}); 
+        else 
+            res.send({success:false, error: 'id에 해당하는 trade가 없습니다.'});
+    });
+})
+
+//get trade list (all or by userid/ busterid/ reqid)
+router.get('/', async (req, res)=> {
+    const reqid = req.query.reqid;
     const userid = req.query.userid;
     const busterid = req.query.busterid;
-    console.log('userid:', userid);
-    console.log('busterid:', busterid);
 
     var whereStatement = {};
 
@@ -93,7 +109,9 @@ router.get('/', async (req, res)=> {
     else if (busterid) {
         whereStatement.busterid = busterid;  
     }
-    
+    else if (reqid) {
+        whereStatement.reqid = reqid;  
+    }
     const result = await Trade.findAll({
         // attributes: ['id', 'userid', 'busterid', 'reqid', 'rev1', 'rev2', 'rev3', [Sequelize.literal('Request.state'),'state']],
         where: whereStatement,
