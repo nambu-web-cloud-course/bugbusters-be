@@ -23,6 +23,7 @@ const trade_router = require("./routes/trade_router.js");
 const request_router = require("./routes/request_router.js");
 const image_router = require("./routes/image_router.js");
 const chat_router = require("./routes/chat_router.js");
+const code_router = require("./routes/code_router.js");
 const { addHook } = require("./models/User.js");
 
 // mongodb
@@ -205,12 +206,12 @@ app.get("/", (req, res) => {
 //     }
 // });
 
-// app.use('/posts', isAuth,  trade_router);
 app.use("/image", image_router);
 app.use("/request", request_router);
 app.use("/trade", trade_router);
 app.use("/auth", auth_router);
 app.use("/chat", chat_router);
+app.use("/code", code_router);
 // app.listen(port);
 
 // socket 실행

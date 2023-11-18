@@ -47,6 +47,7 @@ class Trade extends Sequelize.Model {
         db.Trade.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid' });
         db.Trade.belongsTo(db.User, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid' });
         db.Trade.belongsTo(db.Request, {foreignKey:{name:'reqid', allowNull:false}, sourceKey:'id' });
+
     }
 }
 module.exports = Trade;
