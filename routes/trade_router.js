@@ -25,28 +25,51 @@ router.post('/', async (req, res)=> {
     } catch (error ){
         res.send ({success:false, message:error, error:error});
     }
-    // users.push(new_user);
-    // console.log(users);
-    // res.send({success:true});
-    
+
 })
 
-// modify trade by id
+// modify trade by id ( if state of trade is changed(only to CP), the stae of related request will be updated )
 router.put('/:id', async (req, res) => {
     
     const id = parseInt(req.params.id);
     const content = req.body;  
-    console.log('id:', id);
-    // console.log('content:', post.content);
-    console.log('modified content:', content);
-    // post.content = content;
+    
     try {
         if (id) {
             const result = await Trade.update(content, {where: {id: id} })
-            res.send ({succss:true});
+            if (result > 0 ){
+                // console.log('result:', result);
+                if (content.state && (content.state == 'CP'))
+                // if (content.state && (content.state == 'CA' || content.state == 'CP'))
+                {
+                    // console.log('state 변경:', content.state, 'id:', id);
+                    Trade.findOne({
+                        where: {id:id},
+                        include: [
+                            {
+                                model:Request,
+                            }
+                        ] 
+                    }).then ((resultRequest)=> {
+                        // console.log('request:', resultRequest.Request);
+                        // const reqid = resultRequest.Request.id;
+                        resultRequest.Request.update({state:content.state})
+                        // Trade.update({state:content.state},{where:{id:reqid}})
+                        .then ((updateResult)=> {
+                            // console.log('result:', updateResult)
+                        });
+                    });
+ 
+                }
+                res.send ({succss:true});
+            }
+            else 
+                res.send({success:false,error: 'id에 해당하는 trade가 없습니다.'})
+            
         }
         else 
-            res.send({success:false, message:'id확인해 주세요.'});
+            res.send({success:false,error: 'id값이 없습니다.'})
+            
     } catch (err) {
         res.send ({success:false, message:err, error:err});
     }
@@ -74,14 +97,6 @@ router.get('/', async (req, res)=> {
     const result = await Trade.findAll({
         // attributes: ['id', 'userid', 'busterid', 'reqid', 'rev1', 'rev2', 'rev3', [Sequelize.literal('Request.state'),'state']],
         where: whereStatement,
-        // include: [
-        //     {
-        //         model:Request,
-        //         // as: Request,
-        //         attributes:[],
-        //     }
-        // ],
-        // raw:true,
         order:[['id', 'desc']]
         
     });
