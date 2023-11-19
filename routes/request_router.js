@@ -10,7 +10,7 @@ const { Image } = require('../models');
 // create request
 router.post('/', async (req, res)=> {
     const request = req.body;
-    const images = req.body.profile;
+    const images = req.body.images;
     // new_user.id = users.length+1;
     console.log('images:', images);
     // new_user.password = await create_hash(new_user.password, 10);
