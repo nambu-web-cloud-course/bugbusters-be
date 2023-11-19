@@ -5,7 +5,7 @@ class Buster extends Sequelize.Model {
         return super.init(
             { //테이블의 컬럼 정의
                 profile: { //프로필 사진 URL
-                    type: Sequelize.STRING(100),
+                    type: Sequelize.STRING(150),
                     allowNull: false,
                 },
                 selfintro: { //자기소개 
