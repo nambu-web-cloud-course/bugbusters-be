@@ -12,10 +12,13 @@ const getRooms = require('./services/getRooms');
 const isRoomExist = require("./services/isRoomExist.js");
 const leaveRoom = require("./services/leaveRoom.js");
 
+
 dotenv.config();
 const sync = require("./models/sync.js");
 sync();
 const port = process.env.PORT || 3000;
+// mongodb
+const mongodbUri = process.env.MSGDB_URL;
 
 const app = express();
 const auth_router = require("./routes/auth_router.js");
@@ -24,10 +27,16 @@ const request_router = require("./routes/request_router.js");
 const image_router = require("./routes/image_router.js");
 const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
-const { addHook } = require("./models/User.js");
+const { addHook, getAddresByUserid } = require("./models/User.js");
 
-// mongodb
-const mongodbUri = process.env.MSGDB_URL;
+app.use("/image", image_router);
+app.use("/request", request_router);
+app.use("/trade", trade_router);
+app.use("/auth", auth_router);
+app.use("/chat", chat_router);
+app.use("/code", code_router);
+
+
 
 // Chat Setting
 const BUSTER_BOT = "BugBusters_Official";
@@ -43,7 +52,7 @@ const Room = require("./models/Room.js");
 
 const server = http.createServer(app);
 
-// create socketIO instance
+// create socketIO instance to fe
 const io = socketIO(server, {
   cors: {
     origin: "http://localhost:3000",
@@ -59,7 +68,7 @@ io.on("connection", (socket) => {
   // let  rooms = io.sockets.adapter.rooms;
   // console.log('rooms:', rooms);
   console.log(`🅾️  User connected ${socket.id}`);
-  
+  let createdAt = Date.now(); // Current timestamp
   // ✅ Add a user to a room 
   socket.on("join_room", (data) => {
     // usderid: 로그인한 본인의 아이디
@@ -86,7 +95,7 @@ io.on("connection", (socket) => {
     //   })
     //   .catch((err) => console.log(err));
 
-    let createdAt = Date.now(); // Current timestamp
+    
     // Send message to all users currently in the room, apart from the user that just joined
     // socket.to(room).emit("receive_message", {
     //   message: `${userid}님이 채팅방에 접속했습니다.`,
@@ -134,11 +143,24 @@ io.on("connection", (socket) => {
     .catch((err) => console.log(err));
   });
 
+  socket.on("send_address",(data) => {
+    const {userid, room} = data;
+    getAddresByUserid(userid).then ((address) => {
+    
+      const addrMessage = {
+        userid: BUSTER_BOT,
+        message: `주소: (${address.zipcode}) ${address.addr1} ${address.addr2}`,
+        createdAt
+      }
+      io.in(room).emit("receive_message", addrMessage);
+      console.log( 'address:',addrMessage);
+    });
+  });
   socket.on("leave_room", (data) => {
     const { userid, room } = data;
     socket.leave(room);
     console.log("💧 User leaves the room")
-    const createdAt = Date.now();
+    // const createdAt = Date.now();
     // Remove user from memory
     // 방 나가기를 한 유저에게만 채팅목록 사라지게 하기
     leaveRoom(userid, room).then (()=> {
@@ -206,12 +228,7 @@ app.get("/", (req, res) => {
 //     }
 // });
 
-app.use("/image", image_router);
-app.use("/request", request_router);
-app.use("/trade", trade_router);
-app.use("/auth", auth_router);
-app.use("/chat", chat_router);
-app.use("/code", code_router);
+
 // app.listen(port);
 
 // socket 실행
