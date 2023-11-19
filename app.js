@@ -29,13 +29,6 @@ const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
 const { addHook, getAddresByUserid } = require("./models/User.js");
 
-app.use("/image", image_router);
-app.use("/request", request_router);
-app.use("/trade", trade_router);
-app.use("/auth", auth_router);
-app.use("/chat", chat_router);
-app.use("/code", code_router);
-
 
 
 // Chat Setting
@@ -227,6 +220,13 @@ app.get("/", (req, res) => {
 
 //     }
 // });
+
+app.use("/image", image_router);
+app.use("/request", request_router);
+app.use("/trade", trade_router);
+app.use("/auth", auth_router);
+app.use("/chat", chat_router);
+app.use("/code", code_router);
 
 
 // app.listen(port);
