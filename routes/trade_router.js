@@ -61,7 +61,7 @@ router.put('/:id', async (req, res) => {
                     });
  
                 }
-                res.send ({succss:true});
+                res.send ({success:true});
             }
             else 
                 res.send({success:false,error: 'id에 해당하는 trade가 없습니다.'})

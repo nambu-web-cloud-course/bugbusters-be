@@ -81,5 +81,17 @@ class User extends Sequelize.Model {
         db.User.hasMany(db.Trade, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid'});
         
     }
+
+    static getAddresByUserid = async (userid) => {
+        const result = await this.findOne({
+            attributes: ['addr1', 'addr2', 'zipcode'],
+            where: { userid },
+            raw: true
+        });
+    
+        return result;
+    }
 }
+
+
 module.exports = User;
