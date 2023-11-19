@@ -86,7 +86,7 @@ router.put("/:id", async (req, res) => {
 router.post("/buster", async (req, res) => {
   const new_buster = req.body;
   // const files = JSON.parse(req.body.profile);
-  new_buster.profile = req.body.profile[0];
+  new_buster.profile = req.body.images[0];
   // console.log('buster:', new_buster);userid
 
   console.log("profile", new_buster.profile);
