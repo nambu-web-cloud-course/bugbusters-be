@@ -1,7 +1,9 @@
 {
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
-        ".vscode{,/**}"
+        ".vscode{,/**}",
+        ".env{,/**}",
+        "uploads{,/**}",
     ],
     "appService.defaultWebAppToDeploy": "/subscriptions/1c89d578-37bc-401e-a787-2f43385f2824/resourceGroups/rg-devbusters/providers/Microsoft.Web/sites/api-bugbusters",
     "appService.deploySubpath": "."
