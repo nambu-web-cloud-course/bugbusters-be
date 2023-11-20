@@ -5,8 +5,9 @@
 
 const generateRandomCode = () => Math.floor(100000 + Math.random() * 900000);
 
-const apiKey = "NCSWWE0VPBRKGFVL";
-const apiSecret = "XKTPWYZMM9PIY8VDRDDQCX0CCZSN0PFF";
+
+const apiKey = process.env.SMS_APIKEY;
+const apiSecret = process.env.SMS_APISECRET;
 
 const coolsms = require("coolsms-node-sdk").default;
 const messageService = new coolsms(apiKey, apiSecret);
@@ -20,8 +21,8 @@ const sendSMS = async (phone) => {
 
     const phone_num = phone.replace(/-/g, "");
     const res = await messageService.sendOne({
-      to: "01036761262",
-      from: phone_num,
+      to: phone_num,
+      from: "01036761262",
       text: `안녕하세요, 버그버스터즈입니다. 본인 확인을 위해 인증번호를 입력해주세요. (${authCode})`,
     });
 

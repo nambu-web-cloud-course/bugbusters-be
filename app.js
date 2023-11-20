@@ -16,7 +16,7 @@ const leaveRoom = require("./services/leaveRoom.js");
 dotenv.config();
 const sync = require("./models/sync.js");
 sync();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 // mongodb
 const mongodbUri = process.env.MSGDB_URL;
 
@@ -160,22 +160,26 @@ io.on("connection", (socket) => {
   });
 
   // 주소 전송
-  socket.on("send_address", (data) => {
-    const { userid, room, address } = data;
-    const createdAt = Date.now();
-    const addressMessage = {
-      userid: BUSTER_BOT,
-      message: `${userid} 님의 상세주소입니다. ${address}`,
-      createdAt,
-    };
+  // socket.on("send_address", (data) => {
+  //   const { userid, room } = data;
+  //   const createdAt = Date.now();
+  //   let addressMessage = '';
 
-    io.in(room).emit("receive_message", addressMessage);
+  //   getAddresByUserid(userid).then((address) => {
+  //     addressMessage = {
+  //       userid: BUSTER_BOT,
+  //       message: `${userid} 님의 상세주소입니다. ${address}`,
+  //       createdAt,
+  //     };
+  //   });
+  //   console.log('addressMessage:', addressMessage);
+  //   io.in(room).emit("receive_message", addressMessage);
 
-    // 저장은 안 함?
-    saveMessage(addressMessage.message, addressMessage.userid, room)
-      .then((response) => console.log("user_address:", response))
-      .catch((err) => console.log(err));
-  });
+  //   // 저장은 안 함?
+  //   saveMessage(addressMessage.message, addressMessage.userid, room)
+  //     .then((response) => console.log("user_address:", response))
+  //     .catch((err) => console.log(err));
+  // });
   //////////////////////////////////////////////////
 
   socket.on("send_message", (data) => {
@@ -190,19 +194,27 @@ io.on("connection", (socket) => {
       .catch((err) => console.log(err));
   });
 
+
+  // 'send adress' message received from client
   socket.on("send_address",(data) => {
 
     const {userid, room} = data;
     getAddresByUserid(userid).then ((address) => {
       const createdAt = Date.now();
+      const addrmsg = `${userid} 님의 상세주소입니다. (${address.zipcode}) ${address.addr1} ${address.addr2}`;
       const addrMessage = {
         userid: BUSTER_BOT,
-        message: `주소: (${address.zipcode}) ${address.addr1} ${address.addr2}`,
+        message: addrmsg,
         createdAt
       }
       io.in(room).emit("receive_message", addrMessage);
-      console.log( 'address:',addrMessage);
+      // console.log( 'address:',addrMessage);
+      saveMessage(addrMessage.message, userid, room)
+        .then((response) => console.log("send_address:", response))
+        .catch((err) => console.log(err));
+  // });
     });
+
   });
   socket.on("leave_room", (data) => {
     const { userid, room } = data;
