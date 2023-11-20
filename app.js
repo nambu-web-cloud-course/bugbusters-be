@@ -50,7 +50,7 @@ const io = socketIO(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    credentials: true,
+    // credentials: true,
     // allowedHeaders: ["Access-Control-Allow-Origin:http://localhost:3000"],
   },
 });
