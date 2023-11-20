@@ -155,7 +155,7 @@ io.on("connection", (socket) => {
     io.in(room).emit("receive_message", completeMessage);
 
     saveMessage(completeMessage.message, completeMessage.userid, room)
-      .then((response) => console.log("reqeust_payment:", response))
+      .then((response) => console.log("complete_trade:", response))
       .catch((err) => console.log(err));
   });
 
@@ -191,9 +191,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_address",(data) => {
+
     const {userid, room} = data;
     getAddresByUserid(userid).then ((address) => {
-    
+      const createdAt = Date.now();
       const addrMessage = {
         userid: BUSTER_BOT,
         message: `주소: (${address.zipcode}) ${address.addr1} ${address.addr2}`,

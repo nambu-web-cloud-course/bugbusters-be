@@ -32,7 +32,7 @@ router.put('/:id', async (req, res) => {
     
     const id = parseInt(req.params.id);
     const content = req.body;  
-    
+    // console.log('id:', id, 'content:', content);
     try {
         if (id) {
             const result = await Trade.update(content, {where: {id: id} })
@@ -64,10 +64,11 @@ router.put('/:id', async (req, res) => {
             }
             else 
                 res.send({success:false,error: 'id에 해당하는 trade가 없습니다.'})
-        }
-        res.send({ succss: true });
+        } 
+        else
+          res.send({success:false, error: "id를 입력해주세요."});
       } catch (err) {
-        res.send({ success: false, message: err, error: err });
+          res.send({ success: false, message: err, error: err });
       }
 });
 
