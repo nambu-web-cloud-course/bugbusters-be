@@ -64,15 +64,11 @@ router.put('/:id', async (req, res) => {
             }
             else 
                 res.send({success:false,error: 'id에 해당하는 trade가 없습니다.'})
-            
         }
         res.send({ succss: true });
-      } else
-        res.send({ success: false, error: "id에 해당하는 trade가 없습니다." });
-    } else res.send({ success: false, error: "id값이 없습니다." });
-  } catch (err) {
-    res.send({ success: false, message: err, error: err });
-  }
+      } catch (err) {
+        res.send({ success: false, message: err, error: err });
+      }
 });
 
 //get a trade by id
