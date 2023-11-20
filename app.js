@@ -48,10 +48,10 @@ const server = http.createServer(app);
 // create socketIO instance to fe
 const io = socketIO(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
-    allowedHeaders: ["Access-Control-Allow-Origin:http://localhost:3000"],
+    // allowedHeaders: ["Access-Control-Allow-Origin:http://localhost:3000"],
   },
 });
 
