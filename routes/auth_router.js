@@ -43,7 +43,7 @@ router.post("/sign-in", async (req, res) => {
   const user = req.body;
   console.log("user", user);
   const options = {
-    attributes: ["password"],
+    attributes: ["password", "usertype"],
     where: {
       userid: user.userid,
     },
@@ -58,7 +58,7 @@ router.post("/sign-in", async (req, res) => {
       const token = jwt.sign({ uid: user.userid, rol: "admin" }, secret);
       console.log("token:", token);
       res.cookie("token", token, { httpOnly: true, maxAge: 3600000 }); //send token in the cookie
-      res.send({ success: true, userid: user.userid, token: token }); //send token as a result
+      res.send({ success: true, userid: user.userid, usertype: result.usertype, token: token }); //send token as a result
     } else {
       res.send({
         success: false,
