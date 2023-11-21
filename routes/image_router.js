@@ -50,7 +50,7 @@ const container = (req, file) => {
 //};
 
 const azureStorage = new MulterAzureStorage({
-    connectionString : connection,
+    connectionString : connection, // connectionString  혹은 accessKey+accountName 조합으로 사용해도 됨
     accessKey : accessKey,
     accountName : accountName,
     //컨테이너 명
@@ -61,7 +61,7 @@ const azureStorage = new MulterAzureStorage({
     //metadata: resolveMetadata,
     //'blob' or 'container' or 'private' 으로 업로드 파일 등급을 변경 할수있다.
     containerAccessLevel: 'blob',
-    urlExpirationTime: 60
+    urlExpirationTime: -1 // no expiration
     
 });
 
