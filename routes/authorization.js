@@ -8,7 +8,7 @@ const isAuth = async (req, res, next) => {
     console.log('auth:',auth);
     if (!(auth && auth.startsWith('Bearer')))  {
 
-        return res.send ({message:"Auth error."});
+        return res.send ({success:false, message:"Auth error."});
     }
     
     const token = auth.split (' ')[1]; // 앞에 bearer가 붙어 있어서.. 떼내기..

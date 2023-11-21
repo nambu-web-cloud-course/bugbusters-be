@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sequelize = require("sequelize");
-const { QueryTypes } = require('sequelize');
+const isAuth = require('./authorization.js');
 
 const { User } = require("../models");
 const { Buster } = require("../models");
@@ -73,7 +73,7 @@ router.post("/sign-in", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAuth, async (req, res) => {
   const userid = req.params.id;
   const content = req.body;
 
@@ -112,7 +112,7 @@ router.post("/buster", async (req, res) => {
   }
 });
 
-router.put("/buster/:id", async (req, res) => {
+router.put("/buster/:id", isAuth,async (req, res) => {
   const userid = req.params.id;
   const content = req.body;
   console.log("userid", userid);
@@ -128,7 +128,7 @@ router.put("/buster/:id", async (req, res) => {
   //해당 id가 글이 없는 경우, 처리 - 404?
 });
 
-router.get("/", async (req, res) => {
+router.get("/", isAuth, async (req, res) => {
   const userid = req.query.userid;
   console.log("userid:", userid);
 
@@ -149,7 +149,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/buster", async (req, res) => {
+router.get("/buster", isAuth, async (req, res) => {
   const userid = req.query.userid;
   console.log("userid:", userid);
   const options = {
@@ -211,35 +211,34 @@ router.get("/buster", async (req, res) => {
     .then(async (results) => {  
       if (results && results.length > 0) {
         // Use map to add an additional field to each user in the result
-        const resultsWithAdditionalField = await Promise.all( results.map(async (result) => {
-          console.log('resultid:', result.userid);
+        // const resultsWithAdditionalField = await Promise.all( results.map(async (result) => {
+        //   console.log('resultid:', result.userid);
           
-          await busterreviewviews.findOne({
-            attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
-            where: {busterid: result.userid}
-          }).then (reviewresult => {
+        //   await busterreviewviews.findOne({
+        //     attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
+        //     where: {busterid: result.userid}
+        //   }).then (reviewresult => {
             
-            const resultJson = result.toJSON();
-            // resultJson.additionalField = 'someValue'; // Adding an additional field to each user
-            resultJson.revcode1= reviewresult.revcode1;
-            resultJson.revcode2= reviewresult.revcode2;
-            resultJson.revcode3= reviewresult.revcode3;
-            resultJson.revcode4= reviewresult.revcode4;
-            resultJson.revcode5= reviewresult.revcode5;
-            console.log('resultJson:', resultJson);
-            return resultJson; 
-          })
+        //     const resultJson = result.toJSON();
+        //     // resultJson.additionalField = 'someValue'; // Adding an additional field to each user
+        //     resultJson.revcode1= reviewresult.revcode1;
+        //     resultJson.revcode2= reviewresult.revcode2;
+        //     resultJson.revcode3= reviewresult.revcode3;
+        //     resultJson.revcode4= reviewresult.revcode4;
+        //     resultJson.revcode5= reviewresult.revcode5;
+        //     console.log('resultJson:', resultJson);
+        //     return resultJson; 
+        //   })
           
-        })).then (resultsWithAdditionalField => {
-        // console.log('result:',resultsWithAdditionalField);
-        console.log('result:',resultsWithAdditionalField);
-        res.send({ success: true, data: resultsWithAdditionalField });
-        });
-  
-        
-    
-    // } 
-   }}).catch((err) => {}
+        // })).then (resultsWithAdditionalField => {
+        // // console.log('result:',resultsWithAdditionalField);
+        console.log('result:',results);
+        res.send({ success: true, data: results });
+      }
+    }).catch((err) => {
+      console.log('err:', err);
+      res.send({ success: false, message: err, error: err });
+    }
    );
     
 }});

@@ -27,6 +27,7 @@ const request_router = require("./routes/request_router.js");
 const image_router = require("./routes/image_router.js");
 const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
+const isAuth = require('./routes/authorization.js');
 const { addHook, getAddresByUserid } = require("./models/User.js");
 
 
@@ -159,28 +160,6 @@ io.on("connection", (socket) => {
       .catch((err) => console.log(err));
   });
 
-  // 주소 전송
-  // socket.on("send_address", (data) => {
-  //   const { userid, room } = data;
-  //   const createdAt = Date.now();
-  //   let addressMessage = '';
-
-  //   getAddresByUserid(userid).then((address) => {
-  //     addressMessage = {
-  //       userid: BUSTER_BOT,
-  //       message: `${userid} 님의 상세주소입니다. ${address}`,
-  //       createdAt,
-  //     };
-  //   });
-  //   console.log('addressMessage:', addressMessage);
-  //   io.in(room).emit("receive_message", addressMessage);
-
-  //   // 저장은 안 함?
-  //   saveMessage(addressMessage.message, addressMessage.userid, room)
-  //     .then((response) => console.log("user_address:", response))
-  //     .catch((err) => console.log(err));
-  // });
-  //////////////////////////////////////////////////
 
   socket.on("send_message", (data) => {
     // console.log("send_message", data)
@@ -195,7 +174,7 @@ io.on("connection", (socket) => {
   });
 
 
-  // 'send adress' message received from client
+  // 'send adress' message 
   socket.on("send_address",(data) => {
 
     const {userid, room} = data;
@@ -212,7 +191,7 @@ io.on("connection", (socket) => {
       saveMessage(addrMessage.message, userid, room)
         .then((response) => console.log("send_address:", response))
         .catch((err) => console.log(err));
-  // });
+
     });
 
   });
@@ -259,7 +238,7 @@ io.on("connection", (socket) => {
   // });
 });
 
-// const isAuth = require('./routes/authorization.js');
+
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(
@@ -275,27 +254,13 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 
-//cookie 에서 토큰 검사
-// app.get('/', (req, res)=> {
-//     if(req.cookies.token) {
-//         console.log(req.cookies.token);
-//     } else {
-//         res.cookie('id', 'bomnamu', {
-//             maxAge:10000000,
-//             httpOnly: true, //브라우저에서만 사용가능 (node, rest api 에서 사용 불가)
 
-//         })
-//         res.send('Hello cookies');
-
-//     }
-// });
-
-app.use("/image", image_router);
-app.use("/request", request_router);
-app.use("/trade", trade_router);
+app.use("/image", isAuth, image_router);
+app.use("/request", isAuth, request_router);
+app.use("/trade", isAuth, trade_router);
 app.use("/auth", auth_router);
-app.use("/chat", chat_router);
-app.use("/code", code_router);
+app.use("/chat", isAuth, chat_router);
+app.use("/code", isAuth, code_router);
 
 
 // app.listen(port);
