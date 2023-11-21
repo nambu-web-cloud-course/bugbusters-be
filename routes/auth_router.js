@@ -1,10 +1,13 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { where, Op } = require("sequelize");
+const sequelize = require("sequelize");
+const { QueryTypes } = require('sequelize');
 
 const { User } = require("../models");
 const { Buster } = require("../models");
+const { Trade } = require("../models");
+const { busterreviewviews } = require("../models");
 const router = express.Router();
 
 const secret = process.env.JWT_SECRET || "secret";
@@ -86,10 +89,12 @@ router.put("/:id", async (req, res) => {
 router.post("/buster", async (req, res) => {
   const new_buster = req.body;
   // const files = JSON.parse(req.body.profile);
-  new_buster.profile = req.body.images[0];
-  // console.log('buster:', new_buster);userid
-
-  console.log("profile", new_buster.profile);
+  if (req.body.images) {
+    new_buster.profile = req.body.images[0];
+  
+    console.log('buster:', new_buster);
+  }
+  
   try {
     const result = await Buster.create(new_buster);
     // console.log('result:', result);
@@ -159,24 +164,85 @@ router.get("/buster", async (req, res) => {
     ],
   };
   if (userid) {
+    console.log('userid:', userid);
     // const filtered = posts.filter ((post)=>post.user_id === user_id);
     const result = await Buster.findOne({
-      // attributes: ['user_id', 'user_name'],
-      where: { userid: userid },
+        where: { userid: userid },
+        attributes: [
+          'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
+          [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
+        ],
+        include: [{
+          model: Trade,
+          attributes: [], // Fetch only the count without including Post attributes in the result
+        }],
+        group: ['Buster.userid']
+    
     });
+      
     if (result) {
+      const reviewresult = await busterreviewviews.findOne({
+        attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
+        where: {busterid: userid}
+      });
+      result.dataValues.revcode1= reviewresult.revcode1;
+      result.dataValues.revcode2= reviewresult.revcode2;
+      result.dataValues.revcode3= reviewresult.revcode3;
+      result.dataValues.revcode4= reviewresult.revcode4;
+      result.dataValues.revcode5= reviewresult.revcode5;
+      // console.log('reviewresult:', reviewresult);
       res.send({ success: true, data: result });
     } else
       res.send({ success: false, message: "해당 사용자의 정보가 없습니다." });
   } else {
     // console.log('post length', posts.length);
-    const result = await Buster.findAll({
-      // attributes:['id', 'userid', 'content', 'updated_at'],
+    const results = await Buster.findAll({
+      attributes: [
+        'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
+        [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
+      ],
+      include: [{
+        model: Trade,
+        attributes: [], // Fetch only the count without including Post attributes in the result
+      }],
+      group: ['Buster.userid'] ,
       order: [["created_at", "desc"]],
-    });
-    res.send({ success: true, data: result });
-  }
-});
+    })
+    .then(async (results) => {  
+      if (results && results.length > 0) {
+        // Use map to add an additional field to each user in the result
+        const resultsWithAdditionalField = await Promise.all( results.map(async (result) => {
+          console.log('resultid:', result.userid);
+          
+          await busterreviewviews.findOne({
+            attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
+            where: {busterid: result.userid}
+          }).then (reviewresult => {
+            
+            const resultJson = result.toJSON();
+            // resultJson.additionalField = 'someValue'; // Adding an additional field to each user
+            resultJson.revcode1= reviewresult.revcode1;
+            resultJson.revcode2= reviewresult.revcode2;
+            resultJson.revcode3= reviewresult.revcode3;
+            resultJson.revcode4= reviewresult.revcode4;
+            resultJson.revcode5= reviewresult.revcode5;
+            console.log('resultJson:', resultJson);
+            return resultJson; 
+          })
+          
+        })).then (resultsWithAdditionalField => {
+        // console.log('result:',resultsWithAdditionalField);
+        console.log('result:',resultsWithAdditionalField);
+        res.send({ success: true, data: resultsWithAdditionalField });
+        });
+  
+        
+    
+    // } 
+   }}).catch((err) => {}
+   );
+    
+}});
 
 /////// SMS 코드 추가
 

@@ -78,7 +78,6 @@ class User extends Sequelize.Model {
         db.User.hasOne(db.Buster, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid'});
         db.User.hasMany(db.Request, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid'});
         db.User.hasMany(db.Trade, {foreignKey:{name:'userid',allowNull:false}, sourceKey:'userid'});
-        db.User.hasMany(db.Trade, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid'});
         
     }
 
