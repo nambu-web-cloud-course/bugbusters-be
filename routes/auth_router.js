@@ -54,8 +54,10 @@ router.post("/sign-in", async (req, res) => {
   if (result) {
     const compared = await bcrypt.compare(user.password, result.password);
     console.log(`${user.password}: ${result.password}:${compared}`);
+    const role = (result.usertype === "B") ? "buster" : "user";
+    console.log('role:', role);
     if (compared) {
-      const token = jwt.sign({ uid: user.userid, rol: "admin" }, secret);
+      const token = jwt.sign({ uid: user.userid, rol: role }, secret);
       console.log("token:", token);
       res.cookie("token", token, { httpOnly: true, maxAge: 3600000 }); //send token in the cookie
       res.send({ success: true, userid: user.userid, usertype: result.usertype, token: token }); //send token as a result
