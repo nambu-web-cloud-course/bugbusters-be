@@ -23,6 +23,7 @@ const Request = require('./Request.js');
 const Trade = require('./Trade.js');
 const Image = require('./Image.js');
 const Code = require('./Code.js');
+const busterreviewviews = require('./busterreviewviews.js');
 
 db.User = User;
 db.Buster = Buster;
@@ -30,6 +31,7 @@ db.Request = Request;
 db.Trade = Trade;
 db.Image = Image;
 db.Code = Code;
+db.busterreviewviews = busterreviewviews;
 
 User.init(sequelize);
 Buster.init(sequelize);
@@ -37,6 +39,7 @@ Request.init(sequelize);
 Trade.init(sequelize);
 Image.init(sequelize);
 Code.init(sequelize);
+busterreviewviews.init(sequelize);
 
 
 User.associate(db);

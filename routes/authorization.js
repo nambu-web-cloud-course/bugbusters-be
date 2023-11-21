@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET ;
 const isAuth = async (req, res, next) => {
 
-    // const auth = req.get('Authorization');   // header에서 토큰 가져오기
-    const auth = req.cookies.token; //  cookies 에서 토큰 가져오기
+    const auth = req.get('Authorization');   // header에서 토큰 가져오기
+    // const auth = req.cookies.token; //  cookies 에서 토큰 가져오기
     console.log('auth:',auth);
     if (!(auth && auth.startsWith('Bearer')))  {
 

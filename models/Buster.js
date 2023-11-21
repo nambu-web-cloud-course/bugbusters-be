@@ -5,7 +5,7 @@ class Buster extends Sequelize.Model {
         return super.init(
             { //테이블의 컬럼 정의
                 profile: { //프로필 사진 URL
-                    type: Sequelize.STRING(150),
+                    type: Sequelize.STRING(200),
                     allowNull: false,
                 },
                 selfintro: { //자기소개 
@@ -50,6 +50,7 @@ class Buster extends Sequelize.Model {
         //테이블간 관계를 정의
         // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
         db.Buster.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false, unique:true}, sourceKey:'userid', });
+        db.Buster.hasMany(db.Trade, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid', });
     }
 }
 module.exports = Buster;

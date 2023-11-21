@@ -45,7 +45,7 @@ class Trade extends Sequelize.Model {
         //테이블간 관계를 정의
         // db.Buster.belongsTo(db.User, {foreignKey:'user_userid', sourceKey:'userid'});
         db.Trade.belongsTo(db.User, {foreignKey:{name:'userid', allowNull:false}, sourceKey:'userid' });
-        db.Trade.belongsTo(db.User, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid' });
+        db.Trade.belongsTo(db.Buster, {foreignKey:{name:'busterid', allowNull:false}, sourceKey:'userid' });
         db.Trade.belongsTo(db.Request, {foreignKey:{name:'reqid', allowNull:false}, sourceKey:'id' });
 
     }

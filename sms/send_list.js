@@ -13,8 +13,8 @@ const genRanHex = (size) =>
     .join("");
 const salt = genRanHex(64);
 const message = now + salt;
-const apiKey = "NCSWWE0VPBRKGFVL";
-const apiSecret = "XKTPWYZMM9PIY8VDRDDQCX0CCZSN0PFF";
+const apiKey = process.env.SMS_APIKEY;
+const apiSecret = process.env.SMS_APISECRET;
 const signature = crypto
   .createHmac("sha256", apiSecret)
   .update(message)
