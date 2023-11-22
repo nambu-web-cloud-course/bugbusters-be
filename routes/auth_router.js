@@ -168,53 +168,82 @@ router.get("/buster", isAuth, async (req, res) => {
       },
     ],
   };
-  if (userid) {
-    console.log('userid:', userid);
-    // const filtered = posts.filter ((post)=>post.user_id === user_id);
-    const result = await Buster.findOne({
+  if (userid) {    
+    const isBusterExist = await Buster.findAndCountAll({where:{userid:userid}});
+    if (isBusterExist.count == 0) {
+      res.send({ success: false, message: "해당 사용자의 정보가 없습니다." });
+    }
+    const bustertrade = await Trade.findAndCountAll({where:{busterid:userid, state:'CP'}});
+    // console.log('bustertrade:', bustertrade.count);
+    if (bustertrade.count > 0) // if there's any trade for this buster,
+    {  
+      
+      const result = await Buster.findOne({
+          where: { userid: userid },
+          attributes: [
+            'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
+            [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
+          ],
+          include: [{
+            model: Trade,
+            attributes: [], // Fetch only the count without including Post attributes in the result
+            where: {state:'CP'}
+          }],
+          group: ['Buster.userid']
+      
+      });
+      console.log('result:', result);
+      // get review information from busterreviewviews and add to result
+      if (result) {
+        const reviewresult = await busterreviewviews.findOne({
+          attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
+          where: {busterid: userid}
+        });
+        
+        if (reviewresult) {   //
+          result.dataValues.revcode1= reviewresult.revcode1;
+          result.dataValues.revcode2= reviewresult.revcode2;
+          result.dataValues.revcode3= reviewresult.revcode3;
+          result.dataValues.revcode4= reviewresult.revcode4;
+          result.dataValues.revcode5= reviewresult.revcode5;
+        }
+        // console.log('reviewresult:', reviewresult);
+        else {
+          result.dataValues.revcode1= 0;
+          result.dataValues.revcode2= 0;
+          result.dataValues.revcode3= 0;
+          result.dataValues.revcode4= 0;
+          result.dataValues.revcode5= 0;
+        }
+      }
+      res.send({ success: true, data: result });
+    } else // there's no trade for this buster
+    {
+      const result = await Buster.findOne({
         where: { userid: userid },
         attributes: [
           'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
-          [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
+          [sequelize.literal('0'), 'tradecount'], [sequelize.literal(0),'revcode1'], [sequelize.literal(0),'revcode2'], [sequelize.literal(0),'revcode3'], [sequelize.literal(0),'revcode4'], [sequelize.literal(0),'revcode5'] // Count the number of posts for each user
         ],
-        include: [{
-          model: Trade,
-          attributes: [], // Fetch only the count without including Post attributes in the result
-        }],
-        group: ['Buster.userid']
-    
-    });
-      
-    if (result) {
-      const reviewresult = await busterreviewviews.findOne({
-        attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
-        where: {busterid: userid}
       });
-      result.dataValues.revcode1= reviewresult.revcode1;
-      result.dataValues.revcode2= reviewresult.revcode2;
-      result.dataValues.revcode3= reviewresult.revcode3;
-      result.dataValues.revcode4= reviewresult.revcode4;
-      result.dataValues.revcode5= reviewresult.revcode5;
-      // console.log('reviewresult:', reviewresult);
       res.send({ success: true, data: result });
-    } else
-      res.send({ success: false, message: "해당 사용자의 정보가 없습니다." });
-  } else {
-    // console.log('post length', posts.length);
+    }
+  } else {    // if userid is not given, return all busters
+
     const results = await Buster.findAll({
-      attributes: [
-        'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
-        [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
-      ],
-      include: [{
-        model: Trade,
-        attributes: [], // Fetch only the count without including Post attributes in the result
-      }],
-      group: ['Buster.userid'] ,
+      // attributes: [
+      //   'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
+      //   // [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
+      // ],
+      // include: [{
+      //   model: Trade,
+      //   attributes: [], // Fetch only the count without including Post attributes in the result
+      // }],
+      // group: ['Buster.userid'] ,
       order: [["created_at", "desc"]],
     })
-    .then(async (results) => {  
-      if (results && results.length > 0) {
+    // .then(async (results) => {  
+    //   if (results && results.length > 0) {
         // Use map to add an additional field to each user in the result
         // const resultsWithAdditionalField = await Promise.all( results.map(async (result) => {
         //   console.log('resultid:', result.userid);
@@ -239,15 +268,9 @@ router.get("/buster", isAuth, async (req, res) => {
         // // console.log('result:',resultsWithAdditionalField);
         console.log('result:',results);
         res.send({ success: true, data: results });
-      }
-    }).catch((err) => {
-      console.log('err:', err);
-      res.send({ success: false, message: err, error: err });
-    }
-   );
-    
-}});
-
+  }
+})
+   
 /////// SMS 코드 추가
 
 // 메시지 전송, 랜덤 코드 받기
