@@ -24,6 +24,9 @@ const create_hash = async (password, saltRound) => {
 
 router.post("/sign-up", async (req, res) => {
   const new_user = req.body;
+  let birthdate = new_user.birthdate;
+  birthdate = birthdate.replace(/-/g, "");
+  new_user.birthdate = birthdate;
   // new_user.id = users.length+1;
   console.log("new_user:", new_user);
   new_user.password = await create_hash(new_user.password, 10);
