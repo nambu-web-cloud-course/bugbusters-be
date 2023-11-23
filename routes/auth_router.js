@@ -131,6 +131,26 @@ router.put("/buster/:id", isAuth,async (req, res) => {
   }
 });
 
+// to get whether the userid is already exist or not
+router.get("/isexist", async (req, res) => {
+  const userid = req.query.userid;
+  console.log("userid:", userid);
+
+  if (userid) {
+    // const filtered = posts.filter ((post)=>post.user_id === user_id);
+    const result = await User.findOne({
+      // attributes: ['user_id', 'user_name'],
+      where: { userid: userid },
+    });
+    const data = (result)? true : false; 
+    
+    res.send({ success: true, data: data });
+  } 
+  else {
+    res.send({ success: false, message: "확인할 userid를 입력하세요." });
+  }
+});
+
 router.get("/", isAuth, async (req, res) => {
   const userid = req.query.userid;
   console.log("userid:", userid);
