@@ -32,7 +32,31 @@ router.get('/', async (req, res) => {
         // res.send(err);
     }
     
-   })
+})
+
+// get the number of rooms that user didn't visit yet
+router.get('/new', async (req, res) => {
+
+    const userid = req.query.userid;
+
+    let query={userid:userid, user_visit:false};
+    // console.log('query:', query);
+    try{
+        // const room = await Room.find(query).lean();
+        const count = await Room.find(query).count();
+        // console.log('room:', count);
+
+        res.send({success:true, data:count});
+        // res.json(room);
+        
+    } catch (err) {
+        console.log('err:', err);
+        res.send({success:false, error:err});
+        
+        // res.send(err);
+    }
+
+})
 
 
-   module.exports = router;
+module.exports = router;
