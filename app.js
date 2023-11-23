@@ -25,6 +25,7 @@ const request_router = require("./routes/request_router.js");
 const image_router = require("./routes/image_router.js");
 const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
+const best_router = require("./routes/best_router.js");
 const isAuth = require('./routes/authorization.js');
 const { addHook, getAddresByUserid } = require("./models/User.js");
 
@@ -238,6 +239,7 @@ app.use("/trade", isAuth, trade_router);
 app.use("/auth", auth_router);
 app.use("/chat", isAuth, chat_router);
 app.use("/code", isAuth, code_router);
+app.use("/best", best_router);
 
 
 // app.listen(port);
