@@ -5,7 +5,6 @@
 
 const generateRandomCode = () => Math.floor(100000 + Math.random() * 900000);
 
-
 const apiKey = process.env.SMS_APIKEY;
 const apiSecret = process.env.SMS_APISECRET;
 
@@ -17,6 +16,7 @@ let authCode = "";
 // 단일 발송
 const sendSMS = async (phone) => {
   try {
+    const sendCodeTime = Date.now();
     authCode = generateRandomCode();
 
     const phone_num = phone.replace(/-/g, "");
@@ -30,10 +30,16 @@ const sendSMS = async (phone) => {
       authCode = "";
     }, 3 * 60 * 1000);
 
-    return { authCode, expired: false };
+    return { authCode, sendCodeTime };
   } catch (error) {
     throw error;
   }
 };
 
-module.exports = { sendSMS, getAuthCode: () => authCode };
+module.exports = {
+  sendSMS,
+  getAuthCode: () => ({
+    authCode,
+    sendCodeTime,
+  }),
+};
