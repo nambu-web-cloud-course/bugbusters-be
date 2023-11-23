@@ -12,11 +12,11 @@ const coolsms = require("coolsms-node-sdk").default;
 const messageService = new coolsms(apiKey, apiSecret);
 
 let authCode = "";
-
+let sendCodeTime;
 // 단일 발송
 const sendSMS = async (phone) => {
   try {
-    const sendCodeTime = Date.now();
+    sendCodeTime = Date.now();
     authCode = generateRandomCode();
 
     const phone_num = phone.replace(/-/g, "");
@@ -32,7 +32,7 @@ const sendSMS = async (phone) => {
 
     return { authCode, sendCodeTime };
   } catch (error) {
-    throw error;
+    console.error("Error sending SMS:", error);
   }
 };
 

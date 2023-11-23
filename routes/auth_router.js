@@ -334,10 +334,10 @@ router.post("/code", async (req, res) => {
   console.log("phone:", phone, "userCode:", userCode);
   try {
     const { authCode, sendCodeTime } = getAuthCode();
-
     // Calculate the expiration time
     const expirationTime = sendCodeTime + 3 * 60 * 1000;
-
+    
+    console.log("authCode:", authCode)
     if (userCode === authCode) {
       res.send({ success: true });
     } else if (Date.now() > expirationTime) {
@@ -347,7 +347,8 @@ router.post("/code", async (req, res) => {
       res.send({ success: false, message: "Invalid" });
     }
   } catch (error) {
-    res.send({ success: false, message: error, error: error });
+    console.error("Error in /code route:", error);
+    res.send({ success: false, message: "error", error: error });
   }
 });
 
