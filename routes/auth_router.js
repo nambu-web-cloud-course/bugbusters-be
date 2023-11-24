@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sequelize = require("sequelize");
 const isAuth = require('./authorization.js');
+
 const { User } = require("../models");
 const { Buster } = require("../models");
 const { Trade } = require("../models");
@@ -38,7 +39,6 @@ router.post("/sign-up", async (req, res) => {
   } catch (error) {
     res.send({ success: false, message: error, error: error });
   }
-
 });
 
 router.post("/sign-in", async (req, res) => {
@@ -56,13 +56,18 @@ router.post("/sign-in", async (req, res) => {
   if (result) {
     const compared = await bcrypt.compare(user.password, result.password);
     console.log(`${user.password}: ${result.password}:${compared}`);
-    const role = (result.usertype === "B") ? "buster" : "user";
-    console.log('role:', role);
+    const role = result.usertype === "B" ? "buster" : "user";
+    console.log("role:", role);
     if (compared) {
       const token = jwt.sign({ uid: user.userid, rol: role }, secret);
       console.log("token:", token);
       res.cookie("token", token, { httpOnly: true, maxAge: 3600000 }); //send token in the cookie
-      res.send({ success: true, userid: user.userid, usertype: result.usertype, token: token }); //send token as a result
+      res.send({
+        success: true,
+        userid: user.userid,
+        usertype: result.usertype,
+        token: token,
+      }); //send token as a result
     } else {
       res.send({
         success: false,
@@ -95,10 +100,10 @@ router.post("/buster", async (req, res) => {
   // const files = JSON.parse(req.body.profile);
   if (req.body.images) {
     new_buster.profile = req.body.images[0];
-  
-    console.log('buster:', new_buster);
+
+    console.log("buster:", new_buster);
   }
-  
+
   try {
     const result = await Buster.create(new_buster);
     // console.log('result:', result);
@@ -116,7 +121,7 @@ router.post("/buster", async (req, res) => {
   }
 });
 
-router.put("/buster/:id", isAuth,async (req, res) => {
+router.put("/buster/:id", isAuth, async (req, res) => {
   const userid = req.params.id;
   const content = req.body;
   console.log("userid", userid);
@@ -186,67 +191,100 @@ router.get("/buster", isAuth, async (req, res) => {
       },
     ],
   };
-  if (userid) {    
-    const isBusterExist = await Buster.findAndCountAll({where:{userid:userid}});
+  if (userid) {
+    const isBusterExist = await Buster.findAndCountAll({
+      where: { userid: userid },
+    });
     if (isBusterExist.count == 0) {
       res.send({ success: false, message: "해당 사용자의 정보가 없습니다." });
     }
-    const bustertrade = await Trade.findAndCountAll({where:{busterid:userid, state:'CP'}});
+    const bustertrade = await Trade.findAndCountAll({
+      where: { busterid: userid, state: "CP" },
+    });
     // console.log('bustertrade:', bustertrade.count);
-    if (bustertrade.count > 0) // if there's any trade for this buster,
-    {  
-      
-      const result = await Buster.findOne({
-          where: { userid: userid },
-          attributes: [
-            'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
-            [sequelize.fn('COUNT', sequelize.col('Trades.id')), 'tradecount'] // Count the number of posts for each user
-          ],
-          include: [{
-            model: Trade,
-            attributes: [], // Fetch only the count without including Post attributes in the result
-            where: {state:'CP'}
-          }],
-          group: ['Buster.userid']
-      
-      });
-      // console.log('result:', result);
-      // get review information from busterreviewviews and add to result
-      if (result) {
-        const reviewresult = await busterreviewviews.findOne({
-          attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
-          where: {busterid: userid}
-        });
-        
-        if (reviewresult) {   //
-          result.dataValues.revcode1= reviewresult.revcode1;
-          result.dataValues.revcode2= reviewresult.revcode2;
-          result.dataValues.revcode3= reviewresult.revcode3;
-          result.dataValues.revcode4= reviewresult.revcode4;
-          result.dataValues.revcode5= reviewresult.revcode5;
-        }
-        // console.log('reviewresult:', reviewresult);
-        else {
-          result.dataValues.revcode1= 0;
-          result.dataValues.revcode2= 0;
-          result.dataValues.revcode3= 0;
-          result.dataValues.revcode4= 0;
-          result.dataValues.revcode5= 0;
-        }
-      }
-      res.send({ success: true, data: result });
-    } else // there's no trade for this buster
-    {
+    if (bustertrade.count > 0) {
+      // if there's any trade for this buster,
       const result = await Buster.findOne({
         where: { userid: userid },
         attributes: [
-          'id','userid','profile','selfintro','tech','exp','fav','accbank','accno',
-          [sequelize.literal('0'), 'tradecount'], [sequelize.literal(0),'revcode1'], [sequelize.literal(0),'revcode2'], [sequelize.literal(0),'revcode3'], [sequelize.literal(0),'revcode4'], [sequelize.literal(0),'revcode5'] // Count the number of posts for each user
+          "id",
+          "userid",
+          "profile",
+          "selfintro",
+          "tech",
+          "exp",
+          "fav",
+          "accbank",
+          "accno",
+          [sequelize.fn("COUNT", sequelize.col("Trades.id")), "tradecount"], // Count the number of posts for each user
+        ],
+        include: [
+          {
+            model: Trade,
+            attributes: [], // Fetch only the count without including Post attributes in the result
+            where: { state: "CP" },
+          },
+        ],
+        group: ["Buster.userid"],
+      });
+
+      // get review information from busterreviewviews and add to result
+      if (result) {
+        const reviewresult = await busterreviewviews.findOne({
+          attributes: [
+            "revcode1",
+            "revcode2",
+            "revcode3",
+            "revcode4",
+            "revcode5",
+          ],
+          where: { busterid: userid },
+        });
+
+        if (reviewresult) {
+          //
+          result.dataValues.revcode1 = reviewresult.revcode1;
+          result.dataValues.revcode2 = reviewresult.revcode2;
+          result.dataValues.revcode3 = reviewresult.revcode3;
+          result.dataValues.revcode4 = reviewresult.revcode4;
+          result.dataValues.revcode5 = reviewresult.revcode5;
+        }
+        // console.log('reviewresult:', reviewresult);
+        else {
+          result.dataValues.revcode1 = 0;
+          result.dataValues.revcode2 = 0;
+          result.dataValues.revcode3 = 0;
+          result.dataValues.revcode4 = 0;
+          result.dataValues.revcode5 = 0;
+        }
+      }
+      res.send({ success: true, data: result });
+    } // there's no trade for this buster
+    else {
+      const result = await Buster.findOne({
+        where: { userid: userid },
+        attributes: [
+          "id",
+          "userid",
+          "profile",
+          "selfintro",
+          "tech",
+          "exp",
+          "fav",
+          "accbank",
+          "accno",
+          [sequelize.literal("0"), "tradecount"],
+          [sequelize.literal(0), "revcode1"],
+          [sequelize.literal(0), "revcode2"],
+          [sequelize.literal(0), "revcode3"],
+          [sequelize.literal(0), "revcode4"],
+          [sequelize.literal(0), "revcode5"], // Count the number of posts for each user
         ],
       });
       res.send({ success: true, data: result });
     }
-  } else {    // if userid is not given, return all busters
+  } else {
+    // if userid is not given, return all busters
 
     const results = await Buster.findAll({
       // attributes: [
@@ -259,39 +297,37 @@ router.get("/buster", isAuth, async (req, res) => {
       // }],
       // group: ['Buster.userid'] ,
       order: [["created_at", "desc"]],
-    })
-    // .then(async (results) => {  
+    });
+    // .then(async (results) => {
     //   if (results && results.length > 0) {
-        // Use map to add an additional field to each user in the result
-        // const resultsWithAdditionalField = await Promise.all( results.map(async (result) => {
-        //   console.log('resultid:', result.userid);
-          
-        //   await busterreviewviews.findOne({
-        //     attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
-        //     where: {busterid: result.userid}
-        //   }).then (reviewresult => {
-            
-        //     const resultJson = result.toJSON();
-        //     // resultJson.additionalField = 'someValue'; // Adding an additional field to each user
-        //     resultJson.revcode1= reviewresult.revcode1;
-        //     resultJson.revcode2= reviewresult.revcode2;
-        //     resultJson.revcode3= reviewresult.revcode3;
-        //     resultJson.revcode4= reviewresult.revcode4;
-        //     resultJson.revcode5= reviewresult.revcode5;
-        //     console.log('resultJson:', resultJson);
-        //     return resultJson; 
-        //   })
-          
-        // })).then (resultsWithAdditionalField => {
-        // // console.log('result:',resultsWithAdditionalField);
-        console.log('result:',results);
-        res.send({ success: true, data: results });
+    // Use map to add an additional field to each user in the result
+    // const resultsWithAdditionalField = await Promise.all( results.map(async (result) => {
+    //   console.log('resultid:', result.userid);
+
+    //   await busterreviewviews.findOne({
+    //     attributes:[ 'revcode1', 'revcode2', 'revcode3', 'revcode4', 'revcode5'],
+    //     where: {busterid: result.userid}
+    //   }).then (reviewresult => {
+
+    //     const resultJson = result.toJSON();
+    //     // resultJson.additionalField = 'someValue'; // Adding an additional field to each user
+    //     resultJson.revcode1= reviewresult.revcode1;
+    //     resultJson.revcode2= reviewresult.revcode2;
+    //     resultJson.revcode3= reviewresult.revcode3;
+    //     resultJson.revcode4= reviewresult.revcode4;
+    //     resultJson.revcode5= reviewresult.revcode5;
+    //     console.log('resultJson:', resultJson);
+    //     return resultJson;
+    //   })
+
+    // })).then (resultsWithAdditionalField => {
+    // // console.log('result:',resultsWithAdditionalField);
+    console.log("result:", results);
+    res.send({ success: true, data: results });
   }
+
 })
    
-
-
-
 /////// SMS 코드 추가
 
 // 메시지 전송, 랜덤 코드 받기
@@ -312,19 +348,27 @@ router.post("/sms", async (req, res) => {
 });
 
 router.post("/code", async (req, res) => {
-  const phone = req.body.data.phone;
-  const userCode = req.body.code; // 인증번호 6자리
+  const phone = req.body.phone;
+  const userCode = req.body.code;
 
   console.log("phone:", phone, "userCode:", userCode);
   try {
-    const authCode = getAuthCode();
+    const { authCode, sendCodeTime } = getAuthCode();
+    // Calculate the expiration time
+    const expirationTime = sendCodeTime + 3 * 60 * 1000;
+    
+    console.log("authCode:", authCode)
     if (userCode === authCode) {
       res.send({ success: true });
+    } else if (Date.now() > expirationTime) {
+      res.send({ success: false, message: "Expired" });
+      return; // Return to exit the function after sending the response
     } else {
-      res.send({ success: false, message: "Invalid code" });
+      res.send({ success: false, message: "Invalid" });
     }
   } catch (error) {
-    res.send({ success: false, message: error, error: error });
+    console.error("Error in /code route:", error);
+    res.send({ success: false, message: "error", error: error });
   }
 });
 
