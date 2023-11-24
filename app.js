@@ -233,7 +233,7 @@ app.get("/", (req, res) => {
 });
 
 
-app.use("/image", isAuth, image_router);
+app.use("/image", image_router);
 app.use("/request", isAuth, request_router);
 app.use("/trade", isAuth, trade_router);
 app.use("/auth", auth_router);
