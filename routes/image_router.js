@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { v4: uuid } = require("uuid");
+const { BlobServiceClient } = require("@azure/storage-blob");
 const MulterAzureStorage = require('multer-azure-blob-storage').MulterAzureStorage;
 
 const connection = process.env.AZURE_STORAGE_CONNECTION;
@@ -22,7 +23,7 @@ const resolveBlobName = (req, file) => {
       //본인이 사용하고 싶은 경로 밑 blob파일명을 설정해주는 로직을 만들어 주면된다.
       //경로 설정 /test/파일이름   =>  컨테이너 명/test/파일명 으로  생성
       const uniqueFileName = uuid() + '.' + file.mimetype.split('/')[1];
-      if (userid === '' || userid==='undefined' || userid === undefined)
+      if (userid === '' || userid==='undefined' || userid === undefined) 
         blobName = uniqueFileName;
       else
         blobName = userid+'/'+uniqueFileName;  
@@ -85,19 +86,54 @@ var upload = multer({ storage: azureStorage }).single("file")
 router.post('/',  (req, res) => {
     caller = req.query.caller;
     userid = req.query.userid;
-    // console.log('caller:', caller, 'userid:', userid);
+    console.log('caller:', caller, 'userid:', userid);
     
     upload(req, res, err =>{
         if(err){
           console.log('err:', err);
-          return res.json({success: false, err})
+          return res.json({success: false, err});
+
         }
         // console.log('reqfiels:', res.req.file.url)
         // console.log('filename:', res.req.file.blobName);
+        // console.log('container:', res.req.file.container);
         return res.json({success: true, filePath: res.req.file.url.split('?')[0] , fileName: res.req.file.blobName})
     })
 })
 
+    
+// delete image from azure blob storage
+router.delete('/',  (req, res) => {
+  filepath = req.query.image;
+  caller = req.query.caller;
 
+  console.log('image deletion caller:', caller, 'filepath:', filepath);
+  const container = filepath.split('/')[3];
+  let uniqueFileIdentifier = '';
+  if (caller == 'request') {
+    uniqueFileIdentifier = filepath.split('/')[4] + '/'+ filepath.split('/')[5];
+    // console.log('uniqueFileIdentifier:', uniqueFileIdentifier);
+  }
+  else if (caller == 'profile') {
+    uniqueFileIdentifier = filepath.split('/')[4];
+    // console.log('uniqueFileIdentifier:', uniqueFileIdentifier);
+  }  
+  const { BlobServiceClient } = require("@azure/storage-blob");
+  const blobServiceClient = BlobServiceClient.fromConnectionString(connection);
+  const containerClient = blobServiceClient.getContainerClient(container);
+  containerClient.getBlockBlobClient(uniqueFileIdentifier).deleteIfExists()
+  .then((result) => {
+    // console.log('result:', result.succeeded);
+    if (result.succeeded)
+      return res.json({success: true})
+    else
+      return res.json({success: false, err: '파일 삭제 실패'})
+  }).catch((err) => {
+    console.log('err:', err);
+    return res.json({success: false, err})
+  });
+}
+  
+)
 
 module.exports = router;
