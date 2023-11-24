@@ -136,12 +136,13 @@ router.put("/buster/:id", isAuth, async (req, res) => {
   }
 });
 
-// to get whether the userid is already exist or not
+// to get whether the userid/phone is already exist or not
 router.get("/isexist", async (req, res) => {
   const userid = req.query.userid;
-  console.log("userid:", userid);
+  const phone = req.query.phone;
+  console.log("userid:", userid, "phone:", phone);
 
-  if (userid) {
+  if (userid !== undefined) {
     // const filtered = posts.filter ((post)=>post.user_id === user_id);
     const result = await User.findOne({
       // attributes: ['user_id', 'user_name'],
@@ -151,8 +152,18 @@ router.get("/isexist", async (req, res) => {
     
     res.send({ success: true, data: data });
   } 
+  else if (phone !== undefined) {
+    // const filtered = posts.filter ((post)=>post.user_id === user_id);
+    const result = await User.findOne({
+      // attributes: ['user_id', 'user_name'],
+      where: { phone: phone },
+    });
+    const data = (result)? true : false; 
+    
+    res.send({ success: true, data: data });
+  }
   else {
-    res.send({ success: false, message: "확인할 userid를 입력하세요." });
+    res.send({ success: false, message: "userid or phone is not given" });
   }
 });
 
