@@ -8,8 +8,6 @@ const path = require("path");
 const saveMessage = require("./services/saveMessage.js");
 const getMessages = require("./services/getMessages");
 const setRoom = require("./services/setRoom");
-const getRooms = require("./services/getRooms");
-const isRoomExist = require("./services/isRoomExist.js");
 const leaveRoom = require("./services/leaveRoom.js");
 
 
@@ -27,6 +25,7 @@ const request_router = require("./routes/request_router.js");
 const image_router = require("./routes/image_router.js");
 const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
+const best_router = require("./routes/best_router.js");
 const isAuth = require('./routes/authorization.js');
 const { addHook, getAddresByUserid } = require("./models/User.js");
 
@@ -70,26 +69,8 @@ io.on("connection", (socket) => {
     socket.join(room); // Join the user to a socket room
     console.log(`🦋 userid: ${userid}, Room: ${room}`);
 
-    //룸 정보에서 reqid, userid, busterid 알기 위해 분리
-    const roomarr = room.split("_");
-
-    //db에 동일한 방이 없을 때만 db에 저장
-    isRoomExist(room)
-      .then((response) => {
-        // console.log('isRoomExist:', response);
-        if (!response) setRoom(room, roomarr[1], roomarr[2], roomarr[0]);
-      })
-      .catch((err) => console.log(err));
-
-    // 방정보 넘겨주기? api로 넘겨주는데? 필요없는듯, 나중에 정리
-    // getRooms()
-    //   .then((rooms) => {
-    //     console.log('latest rooms:', rooms);
-    //     socket.emit('latest rooms', rooms);
-    //   })
-    //   .catch((err) => console.log(err));
-
-    
+    setRoom(room, userid);
+        
     // Send message to all users currently in the room, apart from the user that just joined
     // socket.to(room).emit("receive_message", {
     //   message: `${userid}님이 채팅방에 접속했습니다.`,
@@ -206,10 +187,7 @@ io.on("connection", (socket) => {
     // 방 나가기를 한 유저에게만 채팅목록 사라지게 하기
     leaveRoom(userid, room).then(() => {
       leftUsers = allUsers.filter((user) => user.id != socket.id);
-      // allUsers = leaveRoom(socket.id, allUsers);
-      // socket.to(room).emit("chatroom_users", leftUsers);
-      // console.log('allusers:', allUsers)
-      // console.log('leaveroom:;', room);
+    
       socket.to(room).emit("chatroom_users", leftUsers);
       const leavingMessage = {
         // socket.emit("receive_message", {
@@ -261,6 +239,7 @@ app.use("/trade", isAuth, trade_router);
 app.use("/auth", auth_router);
 app.use("/chat", isAuth, chat_router);
 app.use("/code", isAuth, code_router);
+app.use("/best", best_router);
 
 
 // app.listen(port);

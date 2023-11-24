@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sequelize = require("sequelize");
-const isAuth = require("./authorization.js");
+const isAuth = require('./authorization.js');
 
 const { User } = require("../models");
 const { Buster } = require("../models");
@@ -52,7 +52,7 @@ router.post("/sign-in", async (req, res) => {
   };
   // const result = users.find((u)=> u.user_id === user.user_id);
   const result = await User.findOne(options);
-  console.log("signin result:", result);
+  // console.log("signin result:", result);
   if (result) {
     const compared = await bcrypt.compare(user.password, result.password);
     console.log(`${user.password}: ${result.password}:${compared}`);
@@ -134,7 +134,26 @@ router.put("/buster/:id", isAuth, async (req, res) => {
   } catch (err) {
     res.send({ success: false, message: err, error: err });
   }
-  //해당 id가 글이 없는 경우, 처리 - 404?
+});
+
+// to get whether the userid is already exist or not
+router.get("/isexist", async (req, res) => {
+  const userid = req.query.userid;
+  console.log("userid:", userid);
+
+  if (userid) {
+    // const filtered = posts.filter ((post)=>post.user_id === user_id);
+    const result = await User.findOne({
+      // attributes: ['user_id', 'user_name'],
+      where: { userid: userid },
+    });
+    const data = (result)? true : false; 
+    
+    res.send({ success: true, data: data });
+  } 
+  else {
+    res.send({ success: false, message: "확인할 userid를 입력하세요." });
+  }
 });
 
 router.get("/", isAuth, async (req, res) => {
@@ -208,7 +227,7 @@ router.get("/buster", isAuth, async (req, res) => {
         ],
         group: ["Buster.userid"],
       });
-      console.log("result:", result);
+
       // get review information from busterreviewviews and add to result
       if (result) {
         const reviewresult = await busterreviewviews.findOne({
@@ -306,8 +325,9 @@ router.get("/buster", isAuth, async (req, res) => {
     console.log("result:", results);
     res.send({ success: true, data: results });
   }
-});
 
+})
+   
 /////// SMS 코드 추가
 
 // 메시지 전송, 랜덤 코드 받기
