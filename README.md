@@ -12,7 +12,10 @@
 <li>Frontend: App Service on Azure, React.js</li>
 <li>Database: Azure Database for <b>MySQL</b> 서버, Azure Cosmos DB(<b>Mongo DB</b>)</li>
 <li>Image Storage: Azure Storage Account</li>
+<li>개발 도구: Microsoft Visual Studio Code, Notion, Github, DBeaver/MySQL Workbench</li>
 
 <h3>주요 기능 및 특징</h3>
-<li>무서버의 요청을 버스터에게 중개 </li>
+<li>회원 가입 및 로그인, 마이페이지, 버스터 프로필</li>
+<li>무서버의 요청 제출, 요청을 버스터에게 공유 </li>
 <li>채팅을 통한 무서버와 버스터간의 거래 협의 및 성사 (Socket.io) </li>
+<li>무서버, 버스터의 거래 내역 상태별 조회 </li>
