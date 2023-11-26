@@ -114,6 +114,7 @@ io.on("connection", (socket) => {
       userid: BUSTER_BOT,
       message: `${userid}님께서 결제를 요청했습니다.`,
       createdAt,
+      price
     };
 
     io.in(room).emit("receive_message", paymentMessage);
@@ -232,7 +233,6 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 
-
 app.use("/image", image_router);
 app.use("/request", isAuth, request_router);
 app.use("/trade", isAuth, trade_router);
@@ -240,8 +240,6 @@ app.use("/auth", auth_router);
 app.use("/chat", isAuth, chat_router);
 app.use("/code", isAuth, code_router);
 app.use("/best", best_router);
-
-
 // app.listen(port);
 
 // socket 실행
