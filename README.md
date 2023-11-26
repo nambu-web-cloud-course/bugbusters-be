@@ -8,7 +8,7 @@
 <li>소개: 벌레를 잡아주는 서비스를 중개하는 시스템으로 서비스를 이용하려는 '무서버'와 서비스를 제공하는 '버스터'가 주 타겟 고객입니다. </li>
 
 <h3>시스템 구성 및 기술</h3>
-<li>Backend: App Service on Azure, Node.js, Sequlize, Mongoose </li>
+<li>Backend: App Service on Azure, Node.js, Sequlize(ORM), Mongoose </li>
 <li>Frontend: App Service on Azure, React.js</li>
 <li>Database: Azure Database for <b>MySQL</b> 서버, Azure Cosmos DB(<b>Mongo DB</b>)</li>
 <li>Image Storage: Azure Storage Account</li>
