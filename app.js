@@ -67,23 +67,9 @@ io.on("connection", (socket) => {
     // usderid: 로그인한 본인의 아이디
     const { userid, room } = data; // Data sent from client when join_room event emitted
     socket.join(room); // Join the user to a socket room
-    console.log(`🦋 userid: ${userid}, Room: ${room}`);
-
-    setRoom(room, userid);
-        
-    // Send message to all users currently in the room, apart from the user that just joined
-    // socket.to(room).emit("receive_message", {
-    //   message: `${userid}님이 채팅방에 접속했습니다.`,
-    //   userid: BUSTER_BOT,
-    //   createdAt,
-    // });
-
-    // ✅ Send welcome msg to user that just joined chat only
-    // socket.emit("receive_message", {
-    //   message: `${userid}님, 환영해요!`,
-    //   userid: BUSTER_BOT,
-    //   createdAt,
-    // });
+    console.log(`🦋 userid: ${userid}, Room: ${room}`); 
+    
+    setRoom(room, userid, io);
 
     // ✅ Save the new user to the room
     // 현재는 1개의 요청 목록에 방이 여러 개 생김 -> 중복 제거
