@@ -43,6 +43,7 @@ async function setRoom(room, visitor, io) {
                 createdAt,
             };
             io.to(room).emit("receive_message", busterEnteringMessage);
+            console.log('send buster entering msg');
             saveMessage(busterEnteringMessage.message, busterEnteringMessage.userid, room)
                 .then((response) => console.log("receive_message:", response))
                 .catch((err) => console.log(err));
@@ -52,9 +53,6 @@ async function setRoom(room, visitor, io) {
             Room.findOne({room:room}).lean()
             .then((doc)=> {
                 if (!doc.user_visit && user_visit) { // 방은 이미 있음, 무서버가 join했을 때 user_visit을 true로 바꿔줌
-
-
-            
                     const filter = { room: room };
                     // console.log('filter:', filter);
                     const update = { user_visit: true };
@@ -75,7 +73,7 @@ async function setRoom(room, visitor, io) {
                         createdAt,
                     };
                     io.to(room).emit("receive_message",userEnteringMessage);
-                    
+                    console.log('send user entering msg');
                     saveMessage(userEnteringMessage.message, userEnteringMessage.userid, room)
                     .then((response) => console.log("receive_message:", response))
                     .catch((err) => console.log(err));
