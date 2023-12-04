@@ -38,6 +38,8 @@ const container = (req, file) => {
     containerName = 'img-request'
   else if (caller === 'profile') 
     containerName = 'img-profile';
+  else if (caller === 'bugdic')
+    containerName = 'img-bugdic';
   // const containerName = req.body.container
   return containerName
 }
