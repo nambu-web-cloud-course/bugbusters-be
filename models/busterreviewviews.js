@@ -1,3 +1,4 @@
+
 const Sequelize = require('sequelize');
 
 class busterreviewviews extends Sequelize.Model {

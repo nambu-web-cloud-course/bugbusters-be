@@ -38,6 +38,8 @@ const container = (req, file) => {
     containerName = 'img-request'
   else if (caller === 'profile') 
     containerName = 'img-profile';
+  else if (caller === 'bugdic')
+    containerName = 'img-bugdic';
   // const containerName = req.body.container
   return containerName
 }
@@ -110,7 +112,7 @@ router.delete('/',  (req, res) => {
   console.log('image deletion caller:', caller, 'filepath:', filepath);
   const container = filepath.split('/')[3];
   let uniqueFileIdentifier = '';
-  if (caller == 'request') {
+  if (caller == 'request' || caller == 'bugdic') {
     uniqueFileIdentifier = filepath.split('/')[4] + '/'+ filepath.split('/')[5];
     // console.log('uniqueFileIdentifier:', uniqueFileIdentifier);
   }

@@ -27,6 +27,7 @@ const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
 const best_router = require("./routes/best_router.js");
 const isAuth = require('./routes/authorization.js');
+const search_router = require('./routes/search_router.js');
 const { addHook, getAddresByUserid } = require("./models/User.js");
 
 
@@ -67,23 +68,9 @@ io.on("connection", (socket) => {
     // usderid: 로그인한 본인의 아이디
     const { userid, room } = data; // Data sent from client when join_room event emitted
     socket.join(room); // Join the user to a socket room
-    console.log(`🦋 userid: ${userid}, Room: ${room}`);
-
-    setRoom(room, userid);
-        
-    // Send message to all users currently in the room, apart from the user that just joined
-    // socket.to(room).emit("receive_message", {
-    //   message: `${userid}님이 채팅방에 접속했습니다.`,
-    //   userid: BUSTER_BOT,
-    //   createdAt,
-    // });
-
-    // ✅ Send welcome msg to user that just joined chat only
-    // socket.emit("receive_message", {
-    //   message: `${userid}님, 환영해요!`,
-    //   userid: BUSTER_BOT,
-    //   createdAt,
-    // });
+    console.log(`🦋 userid: ${userid}, Room: ${room}`); 
+    
+    setRoom(room, userid, io);
 
     // ✅ Save the new user to the room
     // 현재는 1개의 요청 목록에 방이 여러 개 생김 -> 중복 제거
@@ -240,6 +227,7 @@ app.use("/auth", auth_router);
 app.use("/chat", isAuth, chat_router);
 app.use("/code", isAuth, code_router);
 app.use("/best", best_router);
+app.use("/search", search_router);
 // app.listen(port);
 
 // socket 실행
