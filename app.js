@@ -27,6 +27,7 @@ const chat_router = require("./routes/chat_router.js");
 const code_router = require("./routes/code_router.js");
 const best_router = require("./routes/best_router.js");
 const isAuth = require('./routes/authorization.js');
+const search_router = require('./routes/search_router.js');
 const { addHook, getAddresByUserid } = require("./models/User.js");
 
 
@@ -226,6 +227,7 @@ app.use("/auth", auth_router);
 app.use("/chat", isAuth, chat_router);
 app.use("/code", isAuth, code_router);
 app.use("/best", best_router);
+app.use("/search", search_router);
 // app.listen(port);
 
 // socket 실행

@@ -112,7 +112,7 @@ router.delete('/',  (req, res) => {
   console.log('image deletion caller:', caller, 'filepath:', filepath);
   const container = filepath.split('/')[3];
   let uniqueFileIdentifier = '';
-  if (caller == 'request') {
+  if (caller == 'request' || caller == 'bugdic') {
     uniqueFileIdentifier = filepath.split('/')[4] + '/'+ filepath.split('/')[5];
     // console.log('uniqueFileIdentifier:', uniqueFileIdentifier);
   }
